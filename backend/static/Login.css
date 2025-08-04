@@ -1,0 +1,330 @@
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #eef2f7;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 400px;
+    width: 100%;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+header h1 {
+    font-size: 24px;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+header p {
+    font-size: 14px;
+    color: #7f8c8d;
+    margin-bottom: 20px;
+}
+
+.section {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #34495e;
+    text-align: left;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+textarea,
+select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #dcdfe6;
+    border-radius: 8px;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: #3498db;
+}
+input[type="password"],
+input[type="email"],
+textarea,
+select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #dcdfe6;
+    border-radius: 8px;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+}
+
+input:focus {
+    border-color: #3498db;
+    outline: none;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+.links {
+    margin-top: 10px;
+    text-align: center;
+}
+
+.links a {
+    color: #3498db;
+    text-decoration: none;
+    font-size: 14px;
+    margin: 0 5px;
+}
+
+.links a:hover {
+    text-decoration: underline;
+}
+
+.language-selector {
+    margin-top: 20px;
+    text-align: center;
+}
+
+footer {
+    margin-top: 20px;
+    font-size: 12px;
+    color: #95a5a6;
+    text-align: center;
+}
+/* Nur für Hilfe-Seite */
+.hilfe-page main {
+    text-align: left;
+}
+
+.hilfe-page h2 {
+    color: #2980b9;
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.hilfe-page .faq-list,
+.hilfe-page .contact-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.hilfe-page .faq-list li,
+.hilfe-page .contact-list li {
+    margin-bottom: 15px;
+    background-color: #f9fbfd;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #3498db;
+}
+
+.hilfe-page .faq-list li strong,
+.hilfe-page .contact-list strong {
+    display: block;
+    margin-bottom: 6px;
+    color: #2c3e50;
+}
+
+.container {
+        
+         max-width: 1200px;
+         width: 100%;
+         padding: 30px;
+         background: #ffffff;
+         border-radius: 12px;
+         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+         text-align: center;
+     }
+     
+.calendar-container {
+    width: 100%;
+    max-width: 1100px;
+    margin: 20px auto;
+}
+         @media (max-width: 600px) {
+             .calendar-container {
+                 margin: 10px;
+             }
+         }
+ /* Galerie responsive */
+ .vacation-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 30px;
+}
+.vacation-gallery img {
+    flex: 1 1 calc(25% - 20px);
+    max-width: calc(25% - 20px);
+    height: auto;
+    object-fit: cover;
+    border-radius: 6px;
+}
+@media (max-width: 800px) {
+    .vacation-gallery img { flex: 1 1 calc(50% - 20px); max-width: calc(50% - 20px); }
+}
+@media (max-width: 400px) {
+    .vacation-gallery img { flex: 1 1 100%; max-width: 100%; }
+}
+
+/* Spezifische Footer-Styles für Login-Seite - Alles schwarz auf weiß */
+.main-footer {
+    background-color: #ffffff !important;
+    border-top: 2px solid #000000;
+    margin-top: 40px;
+    padding: 30px 0 20px 0;
+}
+
+.main-footer .footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+}
+
+/* Alle Überschriften schwarz */
+.main-footer .footer-section h3 {
+    color: #000000 !important;
+    font-size: 18px;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+/* Alle Texte und Listen schwarz */
+.main-footer .footer-section p,
+.main-footer .footer-section li,
+.main-footer .footer-section span,
+.main-footer .footer-section div {
+    color: #000000 !important;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+/* Links schwarz */
+.main-footer .footer-section a {
+    color: #000000 !important;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.main-footer .footer-section a:hover {
+    color: #333333 !important;
+    text-decoration: underline;
+}
+
+.main-footer .footer-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.main-footer .social-links {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+/* Social Media Icons schwarz auf weißem Hintergrund */
+.main-footer .social-links a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: #ffffff;
+    color: #000000 !important;
+    border: 2px solid #000000;
+    border-radius: 50%;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-size: 16px;
+}
+
+.main-footer .social-links a:hover {
+    background-color: #f0f0f0;
+    color: #000000 !important;
+    transform: translateY(-2px);
+}
+
+.main-footer .copyright-bar {
+    background-color: #ffffff !important;
+    border-top: 1px solid #000000;
+    padding: 15px 0;
+    margin-top: 30px;
+    text-align: center;
+}
+
+.main-footer .copyright-bar p {
+    color: #000000 !important;
+    font-size: 12px;
+    margin: 0;
+}
+
+/* Alle Icons schwarz */
+.main-footer .footer-section i,
+.main-footer i {
+    color: #000000 !important;
+    margin-right: 8px;
+    width: 16px;
+}
+
+/* Globale Regel: ALLES im Footer schwarz */
+.main-footer,
+.main-footer *,
+.main-footer *:before,
+.main-footer *:after {
+    color: #000000 !important;
+}
+
+/* Ausnahme: Social Media Icons bleiben schwarz auf weißem Grund */
+.main-footer .social-links a,
+.main-footer .social-links a * {
+    color: #000000 !important;
+    background-color: #ffffff !important;
+}
+
+/* Sicherstellen, dass auch versteckte Elemente richtig formatiert sind */
+.main-footer .footer-section *,
+.main-footer .copyright-bar * {
+    color: #000000 !important;
+}

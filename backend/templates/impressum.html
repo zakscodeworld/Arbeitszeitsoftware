@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impressum - BBQ GmbH Zeiterfassung</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/nav-styles.css">
+    <link rel="stylesheet" href="/static/footer-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" href="/static/images/BBQGmbH.png" type="image/png">
+    <script src="/static/js/nav.js" defer></script>
+    <style>
+        .legal-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .legal-content h1 {
+            color: #004a99;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .legal-content h2 {
+            color: #0066cc;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        
+        .legal-content p {
+            margin-bottom: 15px;
+        }
+        
+        .legal-content ul {
+            margin-bottom: 20px;
+            padding-left: 20px;
+        }
+        
+        .legal-content li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <button id="menu-toggle" class="menu-toggle" aria-label="Toggle menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="logo-container">
+            <img src="/static/images/BBQGmbH.png" alt="BBQ GmbH Logo">
+            <h1>BBQ GmbH Zeiterfassung</h1>
+        </div>
+        <nav class="main-nav">
+            <ul>
+                <li><a href="/index.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="/arbeitszeiten.html"><i class="fas fa-clock"></i> Arbeitszeiten</a></li>
+                <li><a href="/urlaub.html"><i class="fas fa-calendar-alt"></i> Urlaub/Abwesenheiten</a></li>
+                <li><a href="/rollen.html" id="adminLinkRoles"><i class="fas fa-user-shield"></i> Rollenverwaltung</a></li>
+                <li><a href="/admin_benutzer.html" id="adminLinkUsers"><i class="fas fa-users-cog"></i> Benutzerverwaltung</a></li>
+                <li><a href="/info.html"><i class="fas fa-info-circle"></i> Info</a></li>
+                <li><a href="/hilfe.html"><i class="fas fa-question-circle"></i> Hilfe</a></li>
+                <li><a href="/passwort.html"><i class="fas fa-key"></i> Passwort ändern</a></li>
+                <li><button class="logout-button" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Impressum</h1>
+        </div>
+        
+        <div class="legal-content">
+            <h2>Angaben gemäß § 5 TMG (Telemediengesetz):</h2>
+            <p>
+                BBQ GmbH<br>
+                Digitalstraße 42<br>
+                D-10115 Berlin<br>
+                Deutschland
+            </p>
+            
+            <h2>Vertreten durch den Geschäftsführer:</h2>
+            <p>Max Mustermann</p>
+            
+            <h2>Kontakt:</h2>
+            <p>
+                Telefon: +49 (0)30 12345678<br>
+                E-Mail: info@bbqgmbh-projekt.de
+            </p>
+            
+            <h2>Registereintrag:</h2>
+            <p>
+                Eintragung im Handelsregister.<br>
+                Registergericht: Amtsgericht Charlottenburg (Berlin)<br>
+                Registernummer: HRB 987654 B (Beispielhaft)
+            </p>
+            
+            <h2>Umsatzsteuer-Identifikationsnummer gemäß § 27 a Umsatzsteuergesetz:</h2>
+            <p>DE123456789</p>
+            
+            <h2>Wirtschafts-Identifikationsnummer gemäß § 139c Abgabenordnung:</h2>
+            <p>DE987654321</p>
+            
+            <h2>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV (Medienstaatsvertrag):</h2>
+            <p>
+                Max Mustermann (für den redaktionellen Teil)<br>
+                c/o BBQ GmbH<br>
+                Digitalstraße 42<br>
+                D-10115 Berlin
+            </p>
+            
+            <h2>Streitschlichtung:</h2>
+            <p>
+                Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit: 
+                <a href="https://ec.europa.eu/consumers/odr" target="_blank">https://ec.europa.eu/consumers/odr</a>.
+                <br>
+                Unsere E-Mail-Adresse finden Sie oben im Impressum.
+            </p>
+            <p>
+                Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer 
+                Verbraucherschlichtungsstelle teilzunehmen.
+            </p>
+            
+            <h2>Haftungsausschluss:</h2>
+            
+            <h3>Haftung für Inhalte</h3>
+            <p>
+                Als Diensteanbieter sind wir gemäß § 7 Abs.1 TMG für eigene Inhalte auf diesen Seiten nach den 
+                allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG sind wir als Diensteanbieter jedoch 
+                nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach 
+                Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen. Verpflichtungen zur 
+                Entfernung oder Sperrung der Nutzung von Informationen nach den allgemeinen Gesetzen bleiben 
+                hiervon unberührt. Eine diesbezügliche Haftung ist jedoch erst ab dem Zeitpunkt der Kenntnis 
+                einer konkreten Rechtsverletzung möglich. Bei Bekanntwerden von entsprechenden Rechtsverletzungen 
+                werden wir diese Inhalte umgehend entfernen.
+            </p>
+            
+            <h3>Haftung für Links</h3>
+            <p>
+                Unser Angebot enthält Links zu externen Webseiten Dritter, auf deren Inhalte wir keinen Einfluss 
+                haben. Deshalb können wir für diese fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte 
+                der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich. 
+                Die verlinkten Seiten wurden zum Zeitpunkt der Verlinkung auf mögliche Rechtsverstöße überprüft. 
+                Rechtswidrige Inhalte waren zum Zeitpunkt der Verlinkung nicht erkennbar. Eine permanente 
+                inhaltliche Kontrolle der verlinkten Seiten ist jedoch ohne konkrete Anhaltspunkte einer 
+                Rechtsverletzung nicht zumutbar. Bei Bekanntwerden von Rechtsverletzungen werden wir derartige 
+                Links umgehend entfernen.
+            </p>
+            
+            <h3>Urheberrecht</h3>
+            <p>
+                Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem 
+                deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung 
+                außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen 
+                Autors bzw. Erstellers. Downloads und Kopien dieser Seite sind nur für den privaten, nicht 
+                kommerziellen Gebrauch gestattet. Soweit die Inhalte auf dieser Seite nicht vom Betreiber erstellt 
+                wurden, werden die Urheberrechte Dritter beachtet. Insbesondere werden Inhalte Dritter als solche 
+                gekennzeichnet. Sollten Sie trotzdem auf eine Urheberrechtsverletzung aufmerksam werden, bitten 
+                wir um einen entsprechenden Hinweis. Bei Bekanntwerden von Rechtsverletzungen werden wir derartige 
+                Inhalte umgehend entfernen.
+            </p>
+            <p class="stand">
+                <em>Diese Datenschutzerklärung ist lediglich eine vereinfachte Form der Darstellung, da es ein 
+                Universitätsprojekt ist!</em>
+            </p>
+            <p><em>Stand: 31. Mai 2025</em></p>
+        </div>
+    </div>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Über uns</h3>
+                <p>BBQ GmbH ist ein führender Anbieter für Digitalesoftware</p>                <div class="social-links">
+                    <a href="/404.html?feature=social" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="/404.html?feature=social" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="/404.html?feature=social" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="/404.html?feature=social" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Kontakt</h3>
+                <p><i class="fas fa-map-marker-alt"></i> Digitalstraße 42, 10115 Berlin</p>
+                <p><i class="fas fa-phone"></i> +49 30 12345678</p>
+                <p><i class="fas fa-envelope"></i> info@bbqgmbh-projekt.de</p>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Links</h3>
+                <ul>
+                    <li><a href="/info.html">Über uns</a></li>
+                    <li><a href="/hilfe.html">Hilfe & Support</a></li>
+                    <li><a href="/datenschutz.html">Datenschutz</a></li>
+                    <li><a href="/impressum.html">Impressum</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="copyright-bar">
+            <p>&copy; 2025 BBQ GmbH Zeiterfassungssystem. Alle Rechte vorbehalten.</p>
+        </div>
+    </footer>
+
+    <script>        function logout() {
+            // Clear localStorage
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('currentUser');
+            
+            // Clear sessionStorage
+            sessionStorage.removeItem('accessToken');
+            sessionStorage.removeItem('currentUser');
+            
+            // Clear cookies (set them to expire)
+            document.cookie.split(";").forEach(function(c) {
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+            });
+            
+            // Redirect to Login page with capital L
+            window.location.href = '/Login.html';
+        }
+        
+        // Script to show admin links based on role
+        async function checkAdminRoleForNav() {
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            try {
+                const response = await fetch('/auth/users/me', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    const userData = await response.json();
+                    
+                    // Check if user has admin privileges
+                    const isAdmin = userData.role_id === 1 || (userData.rolle && userData.rolle.name === 'Administrator');
+                    
+                    // Check if user has manager privileges
+                    const isManager = userData.role_id === 2 || (userData.rolle && userData.rolle.name === 'Manager');
+                    
+                    // Update navigation menu
+                    if (isAdmin || isManager) {
+                        document.getElementById('adminLinkRoles').style.display = 'inline-block';
+                    }
+                    
+                    if (isAdmin) {
+                        document.getElementById('adminLinkUsers').style.display = 'inline-block';
+                    }
+                } else if (response.status === 401 || response.status === 403) {
+                    localStorage.removeItem('accessToken');
+                    window.location.href = '/login.html';
+                }
+            } catch (error) {
+                console.error('Error fetching user role for nav:', error);
+                localStorage.removeItem('accessToken');
+                window.location.href = '/login.html';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAdminRoleForNav();
+        });
+    </script>
+</body>
+</html>
+

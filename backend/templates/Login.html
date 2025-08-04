@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>Login | BBQ GmbH</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/footer-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" href="/static/images/BBQGmbH.png" type="image/png">
+    <style>
+        .login-page {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f4f8;
+        }
+        
+        .login-container {
+            max-width: 450px;
+            width: 90%;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .login-header img {
+            height: 70px;
+            margin-bottom: 15px;
+        }
+        
+        .login-header h1 {
+            color: #004a99;
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+        
+        .login-form {
+            margin-bottom: 20px;
+        }
+        
+        .login-links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        .login-links a {
+            color: #005cb3;
+            text-decoration: none;
+            margin: 5px 0;
+            font-size: 0.9em;
+        }
+        
+        .login-links a:hover {
+            text-decoration: underline;
+        }
+        
+        .language-selector {
+            text-align: center;
+            margin-top: 15px;
+        }
+          .login-footer {
+            text-align: center;
+            color: #666;
+            font-size: 0.8em;
+            margin-top: 10px;
+        }
+        
+        /* Login page specific footer styles */        .login-page footer.footer {
+            background: #f8f9fa;
+            color: #333;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .login-page footer.footer .footer-section h3 {
+            color: #333;
+        }
+        
+        .login-page footer.footer .footer-section a {
+            color: #666;
+        }
+        
+        .login-page footer.footer .footer-section a:hover {
+            color: #005cb3;
+        }
+        
+        .login-page footer.footer .social-links a {
+            background: rgba(0, 92, 179, 0.1);
+            color: #005cb3;
+        }
+        
+        .login-page footer.footer .social-links a:hover {
+            background: rgba(0, 92, 179, 0.2);
+            color: #004a99;
+        }
+        
+        .login-page footer.footer .copyright-bar {
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .login-page footer.footer .copyright-bar p {
+            color: #666;
+        }
+    </style>
+</head>
+<body class="login-page">
+    <div class="login-container">
+        <div class="login-header">
+            <img src="/static/images/BBQGmbH.png" alt="BBQ GmbH Logo">
+            <h1>WILLKOMMEN BEI BBQ GMBH</h1>
+            <p>Bitte melden Sie sich an, um fortzufahren.</p>
+        </div>
+        <div class="login-form">
+            {% if error %}
+            <p class="error" style="color:red">{{ error }}</p>
+            {% endif %}
+            <div id="error-message" class="error" style="color:red; display:none;"></div> {# Added for API errors #}            <form id="loginForm" class="login-form"> 
+                <label for="nutzername">Ihr Nutzername:</label>
+                <input type="text" id="nutzername" name="nutzername" placeholder="Nutzername eingeben" minlength="5" maxlength="20" required>
+                
+                <label for="passwort">Passwort:</label>
+                <input type="password" id="passwort" name="passwort" placeholder="Passwort eingeben" minlength="12" maxlength="50" required>
+                
+                <button type="submit" class="button">Anmelden</button>
+            </form>
+            <div class="login-links">
+                <a href="/passwort.html">Passwort vergessen?</a>
+                <a href="/hilfe.html">Hilfe benötigt?</a>
+                <a href="/register.html">Noch nicht registriert?</a>
+            </div>
+        </div>
+        <div class="language-selector">
+            <label for="language">Sprache auswählen:</label>
+            <select id="language" onchange="alert('Sprache wurde geändert zu: ' + this.value)">
+                <option value="de">Deutsch</option>
+            </select>
+        </div>    </div>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Über uns</h3>
+                <p>BBQ GmbH - Ihr Partner für professionelle Zeiterfassung und Projektmanagement.</p>
+                <div class="social-links">
+                    <a href="/404.html?feature=social" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="/404.html?feature=social" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="/404.html?feature=social" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="/404.html?feature=social" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Kontakt</h3>
+                <p><i class="fas fa-map-marker-alt"></i> Digitalstraße 42, 10115 Berlin</p>
+                <p><i class="fas fa-phone"></i> +49 30 12345678</p>
+                <p><i class="fas fa-envelope"></i> info@bbqgmbh-projekt.de</p>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Links</h3>
+                <ul>
+                    <li><a href="/hilfe.html">Hilfe & Support</a></li>
+                    <li><a href="/datenschutz.html">Datenschutz</a></li>
+                    <li><a href="/impressum.html">Impressum</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="copyright-bar">
+            <p>&copy; 2025 BBQ GmbH Zeiterfassungssystem. Alle Rechte vorbehalten.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('loginForm').addEventListener('submit', async function(event) {
+                event.preventDefault();
+                const username = document.getElementById('nutzername').value;
+                const password = document.getElementById('passwort').value;
+                const errorMessageDiv = document.getElementById('error-message');
+
+                // Hide any previous error messages
+                errorMessageDiv.style.display = 'none';
+
+                const formData = new URLSearchParams();
+                formData.append('username', username);
+                formData.append('password', password);
+
+                try {
+                    const response = await fetch('/auth/token', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        localStorage.setItem('accessToken', data.access_token);
+                        localStorage.setItem('tokenType', data.token_type);
+                        window.location.href = '/index.html'; // Redirect to dashboard with .html extension
+                    } else {
+                        const errorData = await response.json();
+                        errorMessageDiv.textContent = errorData.detail || 'Login fehlgeschlagen. Bitte überprüfen Sie Ihre Eingaben.';
+                        errorMessageDiv.style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
+                    errorMessageDiv.textContent = 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
+                    errorMessageDiv.style.display = 'block';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

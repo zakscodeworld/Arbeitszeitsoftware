@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Arbeitszeiten verwalten - BBQ GmbH</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/nav-styles.css">
+    <link rel="stylesheet" href="/static/footer-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" href="/static/images/BBQGmbH.png" type="image/png">
+    <script src="/static/js/notifications.js"></script>
+    <style>
+        .select-with-buttons {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .select-with-buttons select {
+            flex-grow: 1;
+        }
+        
+        .icon-button {
+            background-color: #4a86e8; /* Blauer Hintergrund */
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px; /* Kleinere Buttons */
+            cursor: pointer;
+            font-size: 16px; /* Angepasste Schriftgröße */
+            transition: all 0.2s;
+            color: white;
+        }
+        
+        .icon-button:hover {
+            background-color: #3a76d8; /* Dunkleres Blau beim Hover */
+        }
+        
+        .add-button {
+            background-color: #4a86e8; 
+        }
+        
+        .add-button:hover {
+            background-color: #3a76d8; 
+        }
+        
+        .delete-button {
+            background-color: #4a86e8; 
+        }
+        
+        .delete-button:hover {
+            background-color: #e74c3c; /* Roter Hintergrund beim Hover für Löschen */
+        }
+        
+        button.primary {
+            background-color: #4a86e8;
+            color: white;
+            border: none;
+        }
+        
+        button.primary:hover {
+            background-color: #3a76d8;
+        }
+        
+        button.danger {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+        }
+        
+        button.danger:hover {
+            background-color: #d73c2c;
+        }
+        
+        .message {
+            padding: 10px 15px;
+            margin-bottom: 20px; 
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+            font-size: 0.95em;
+        }
+        
+        .message.error {
+            background-color: #ffebee; 
+            color: #c62828; 
+            border-left: 4px solid #f44336; 
+        }
+        
+        .message.success {
+            background-color: #e8f5e9; 
+            color: #2e7d32; 
+            border-left: 4px solid #4caf50; 
+        }
+        
+        .message.warning {
+            background-color: #fff8e1; 
+            color: #ef6c00; 
+            border-left: 4px solid #ff9800; 
+        }
+        
+        .message.info {
+            background-color: #e3f2fd; 
+            color: #1565c0; 
+            border-left: 4px solid #2196f3; 
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001; 
+            color: #333;
+            font-size: 1.2em;
+        }
+        .loading-overlay i {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <button id="menu-toggle" class="menu-toggle" aria-label="Toggle menu" aria-expanded="false">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="logo-container">
+            <img src="/static/images/BBQGmbH.png" alt="BBQ GmbH Logo">
+            <h1>BBQ GmbH Zeiterfassung</h1>
+        </div>
+        <nav class="main-nav">
+            <ul>
+                <li><a href="/index.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="/arbeitszeiten.html"><i class="fas fa-clock"></i> Arbeitszeiten</a></li>
+                <li><a href="/urlaub.html"><i class="fas fa-calendar-alt"></i> Urlaub/Abwesenheiten</a></li>
+                <li><a href="/urlaube/genehmigen" id="adminLinkApprovals" style="display:none;"><i class="fas fa-check-circle"></i> Urlaubsgenehmigungen</a></li>
+                <li><a href="/rollen.html" id="adminLinkRoles" style="display:none;"><i class="fas fa-user-shield"></i> Rollenverwaltung</a></li>
+                <li><a href="/admin_benutzer.html" id="adminLinkUsers" style="display:none;"><i class="fas fa-users-cog"></i> Benutzerverwaltung</a></li>
+                <li><a href="/info.html"><i class="fas fa-info-circle"></i> Info</a></li>
+                <li><a href="/hilfe.html"><i class="fas fa-question-circle"></i> Hilfe</a></li>
+                <li><a href="/passwort.html"><i class="fas fa-key"></i> Passwort ändern</a></li>
+                <li><button class="logout-button" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Arbeitszeiten verwalten</h1>
+        </div>
+        
+        <div id="message-area"></div>
+
+        <div class="card-container">
+            <div class="card">
+                <h2>Neuen Zeiteintrag hinzufügen</h2>
+                <div class="card-content">
+                    <form id="add-time-entry-form">
+                        <div class="form-group">
+                            <label for="projekt_id">Projekt:</label>
+                            <div class="select-with-buttons">
+                                <select id="projekt_id" name="projekt_id" required></select>
+                                <button type="button" class="icon-button add-button" id="add-project-btn" title="Neues Projekt hinzufügen">+</button>
+                                <button type="button" class="icon-button delete-button" id="delete-project-btn" title="Ausgewähltes Projekt löschen">×</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="aufgabe_id">Aufgabe:</label>
+                            <div class="select-with-buttons">
+                                <select id="aufgabe_id" name="aufgabe_id" required></select>
+                                <button type="button" class="icon-button add-button" id="add-task-btn" title="Neue Aufgabe hinzufügen">+</button>
+                                <button type="button" class="icon-button delete-button" id="delete-task-btn" title="Ausgewählte Aufgabe löschen">×</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="datum">Datum:</label>
+                            <input type="date" id="datum" name="datum" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="startzeit">Startzeit:</label>
+                            <input type="time" id="startzeit" name="startzeit" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="endzeit">Endzeit:</label>
+                            <input type="time" id="endzeit" name="endzeit" required>
+                        </div>
+                        <div id="duration-info" style="margin: 10px 0; font-weight: bold;"></div>
+
+                        <div class="form-group">
+                            <label for="beschreibung">Beschreibung (optional):</label>
+                            <textarea id="beschreibung" name="beschreibung" placeholder="Beschreibung der geleisteten Arbeit..."></textarea>
+                        </div>
+                        
+                        <button type="submit" class="primary"><i class="fas fa-plus"></i> Hinzufügen</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Meine Zeiteinträge</h2>
+            <div class="card-content">
+                <table id="time-entries-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Projekt</th>
+                            <th>Aufgabe</th>
+                            <th>Datum</th>
+                            <th>Startzeit</th>
+                            <th>Endzeit</th>
+                            <th>Beschreibung</th>
+                            <th>Aktionen</th>
+                        </tr>
+                    </thead>
+                    <tbody id="time-entries-tbody">
+                        </tbody>
+                </table>
+                <div class="pagination" id="pagination-controls">
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Über uns</h3>
+                <p>BBQ GmbH ist ein führender Anbieter von Bildungs- und Beratungslösungen für Unternehmen und Institutionen.</p>
+                <div class="social-links">
+                    <a href="/404.html?feature=social" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="/404.html?feature=social" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="/404.html?feature=social" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="/404.html?feature=social" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3>Kontakt</h3>
+                <p><i class="fas fa-map-marker-alt"></i> Digitalstraße 42, 10115 Berlin</p>
+                <p><i class="fas fa-phone"></i> +49 30 12345678</p>
+                <p><i class="fas fa-envelope"></i> info@bbqgmbh-projekt.de</p>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Links</h3>
+                <ul>
+                    <li><a href="/info.html">Über uns</a></li>
+                    <li><a href="/hilfe.html">Hilfe & Support</a></li>
+                    <li><a href="/datenschutz.html">Datenschutz</a></li>
+                    <li><a href="/impressum.html">Impressum</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="copyright-bar">
+            <p>&copy; 2025 BBQ GmbH Zeiterfassungssystem. Alle Rechte vorbehalten.</p>
+        </div>
+    </footer>
+
+<script>
+    // Constants and globals
+    const token = localStorage.getItem('accessToken');
+    const messageArea = document.getElementById('message-area');
+    let currentPage = 1;
+    const itemsPerPage = 10;
+    let allTasksCache = []; 
+    let currentProjects = []; 
+
+    function displayMessage(message, type = 'error') {
+        messageArea.innerHTML = `<div class="message ${type}"><p>${message}</p></div>`;
+        setTimeout(() => { messageArea.innerHTML = ''; }, 5000);
+    }
+
+    if (!token && window.location.pathname !== '/login.html' && window.location.pathname !== '/Login.html') {
+        window.location.href = '/login.html';
+    }
+
+    async function fetchWithAuth(url, options = {}) {
+        const currentToken = localStorage.getItem('accessToken');
+        if (!currentToken) {
+            if (window.location.pathname !== '/login.html' && window.location.pathname !== '/Login.html') {
+                window.location.href = '/login.html?message=Session abgelaufen. Bitte erneut anmelden.';
+            }
+            throw new Error('Unauthorized - No token');
+        }
+        
+        try {
+            const headers = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${currentToken}`,
+                ...options.headers,
+            };
+            const response = await fetch(url, { ...options, headers });
+            if (response.status === 401) {
+                localStorage.removeItem('accessToken');
+                 if (window.location.pathname !== '/login.html' && window.location.pathname !== '/Login.html') {
+                    window.location.href = '/login.html?message=Session abgelaufen. Bitte erneut anmelden.';
+                }
+                throw new Error('Unauthorized');
+            }
+            return response;
+        } catch (error) {
+            console.error(`Netzwerkfehler bei Anfrage an ${url}:`, error);
+            displayMessage(`Netzwerkfehler: ${error.message}. Bitte überprüfen Sie Ihre Internetverbindung.`);
+            throw error;
+        }
+    }
+
+    function handleProjectChange() {
+        const projectSelect = document.getElementById('projekt_id');
+        if (projectSelect.value === "new") {
+            const projectName = prompt("Name des neuen Projekts:");
+            if (projectName && projectName.trim()) {
+                createNewProject(projectName.trim());
+            } else {
+                projectSelect.value = ""; 
+                populateTaskSelect(null); 
+            }
+        } else {
+            populateTaskSelect(projectSelect.value || null);
+        }
+    }
+
+    function handleTaskChange() {
+        const taskSelect = document.getElementById('aufgabe_id');
+        // console.log(`[handleTaskChange] Wert geändert auf: ${taskSelect.value}`);
+        if (taskSelect.value === "new") {
+            const projectId = document.getElementById('projekt_id').value;
+            // console.log(`[handleTaskChange] "Neue Aufgabe erstellen" ausgewählt. Projekt-ID: ${projectId}`);
+            if (projectId && projectId !== "new" && projectId !== "") {
+                const taskName = prompt("Name der neuen Aufgabe:");
+                if (taskName && taskName.trim()) {
+                    // console.log(`[handleTaskChange] Aufgabenname erhalten: "${taskName.trim()}", starte createNewTask.`);
+                    createNewTask(taskName.trim(), projectId);
+                } else {
+                    // console.log("[handleTaskChange] Kein Aufgabenname eingegeben oder abgebrochen.");
+                    taskSelect.value = ""; 
+                }
+            } else {
+                displayMessage('Bitte wählen Sie zuerst ein Projekt aus, um eine neue Aufgabe zu erstellen.', 'warning');
+                // console.warn("[handleTaskChange] Kein gültiges Projekt ausgewählt für neue Aufgabe.");
+                taskSelect.value = ""; 
+            }
+        }
+    }
+
+    async function fetchProjects() {
+        try {
+            const response = await fetchWithAuth('/api/v1/projects/');
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ detail: `HTTP Fehler: ${response.status}` }));
+                throw new Error(errorData.detail || `Fehler beim Laden der Projekte: ${response.statusText}`);
+            }
+            const projects = await response.json();
+            currentProjects = projects; 
+            
+            const projectSelect = document.getElementById('projekt_id');
+            const currentSelectedProjectId = projectSelect.value;
+            projectSelect.innerHTML = '<option value="">Projekt auswählen</option>'; 
+            
+            const newProjectOption = document.createElement('option');
+            newProjectOption.value = "new";
+            newProjectOption.textContent = "➕ Neues Projekt erstellen...";
+            projectSelect.appendChild(newProjectOption);
+            
+            projects.forEach(project => {
+                const option = document.createElement('option');
+                option.value = project.id;
+                option.textContent = project.name;
+                projectSelect.appendChild(option);
+            });
+
+            if (projects.find(p => p.id.toString() === currentSelectedProjectId)) {
+                projectSelect.value = currentSelectedProjectId;
+            } else {
+                 projectSelect.value = ""; 
+            }
+            
+            projectSelect.removeEventListener('change', handleProjectChange);
+            projectSelect.addEventListener('change', handleProjectChange);
+            populateTaskSelect(projectSelect.value || null);
+
+        } catch (error) {
+            console.error('Fehler beim Laden der Projekte:', error);
+            displayMessage('Projekte konnten nicht geladen werden: ' + error.message);
+        }
+    }
+
+    async function createNewProject(projectName) {
+        try {
+            const response = await fetchWithAuth('/api/v1/projects/', {
+                method: 'POST',
+                body: JSON.stringify({ name: projectName, beschreibung: "", status: "aktiv" })
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ detail: `HTTP Fehler: ${response.status}` }));
+                throw new Error(errorData.detail || `Fehler beim Erstellen des Projekts: ${response.statusText}`);
+            }
+            
+            const newProject = await response.json();
+            displayMessage('Projekt erfolgreich erstellt!', 'success');
+            
+            currentProjects.push(newProject);
+            const projectSelect = document.getElementById('projekt_id');
+            const option = document.createElement('option');
+            option.value = newProject.id;
+            option.textContent = newProject.name;
+            projectSelect.appendChild(option);
+            projectSelect.value = newProject.id; 
+            populateTaskSelect(newProject.id); 
+
+        } catch (error) {
+            console.error('Fehler beim Erstellen des Projekts:', error);
+            displayMessage(`Fehler beim Erstellen des Projekts: ${error.message}`);
+            document.getElementById('projekt_id').value = ""; 
+        }
+    }
+
+    async function fetchAllTasksOnce() {
+        try {
+            const response = await fetchWithAuth('/api/v1/tasks/');
+            if (!response.ok) {
+                 const errorData = await response.json().catch(() => ({ detail: `HTTP Fehler: ${response.status}` }));
+                throw new Error(errorData.detail || `Fehler beim Laden aller Aufgaben: ${response.statusText}`);
+            }
+            allTasksCache = await response.json();
+            const currentProjectId = document.getElementById('projekt_id').value;
+            populateTaskSelect(currentProjectId || null); 
+            return allTasksCache;
+        } catch (error) {
+            console.error('Fehler beim Laden aller Aufgaben:', error);
+            displayMessage('Aufgaben konnten nicht geladen werden: ' + error.message);
+            allTasksCache = []; 
+            populateTaskSelect(null); 
+            return [];
+        }
+    }
+
+    function populateTaskSelect(projectId) {
+        const taskSelect = document.getElementById('aufgabe_id');
+        const currentSelectedTaskId = taskSelect.value; 
+        taskSelect.innerHTML = '<option value="">Aufgabe auswählen</option>'; 
+        
+        const projectIsValid = projectId && projectId !== "new" && projectId !== "";
+
+        if (projectIsValid) {
+            const newTaskOption = document.createElement('option');
+            newTaskOption.value = "new";
+            newTaskOption.textContent = "➕ Neue Aufgabe erstellen...";
+            taskSelect.appendChild(newTaskOption);
+        }
+        
+        const projectIdNum = projectIsValid ? parseInt(projectId) : NaN;
+        const filteredTasks = projectIsValid && !isNaN(projectIdNum)
+            ? allTasksCache.filter(task => task.projekt_id === projectIdNum)
+            : []; 
+
+        filteredTasks.forEach(task => {
+            const option = document.createElement('option');
+            option.value = task.id.toString(); 
+            option.textContent = task.name;
+            taskSelect.appendChild(option);
+        });
+        
+        let taskSelected = false;
+        if (filteredTasks.some(t => t.id.toString() === currentSelectedTaskId)) {
+            taskSelect.value = currentSelectedTaskId;
+            taskSelected = true;
+        }
+        
+        if (!taskSelected && currentSelectedTaskId !== "new") {
+            taskSelect.value = "";
+        } else if (!taskSelected && currentSelectedTaskId === "new" && projectIsValid) {
+            taskSelect.value = "new";
+        }
+
+        taskSelect.removeEventListener('change', handleTaskChange);
+        taskSelect.addEventListener('change', handleTaskChange);
+    }
+
+    async function createNewTask(taskName, projectId) {
+        // console.log(`[createNewTask] Starte Erstellung für Aufgabe "${taskName}" mit Projekt-ID: ${projectId}`);
+        if (!taskName || !projectId || projectId === "new" || projectId === "") {
+            displayMessage("Ungültiger Aufgabenname oder Projekt-ID.", "error");
+            // console.error("[createNewTask] Abbruch: Ungültiger Aufgabenname oder Projekt-ID.", { taskName, projectId });
+            return;
+        }
+        let projectIdInt;
+        try {
+            projectIdInt = parseInt(projectId);
+            if (isNaN(projectIdInt)) { throw new Error("Projekt-ID ist keine gültige Zahl."); }
+        } catch (e) {
+            displayMessage(`Fehler: ${e.message}`, "error"); /* console.error("[createNewTask] Abbruch: ", e); */ return;
+        }
+
+        try {
+            const payload = {
+                name: taskName, beschreibung: "", projekt_id: projectIdInt,
+                status: "offen", geplante_stunden: 0
+            };
+            // console.log("[createNewTask] Sende Payload an API:", payload);
+            const response = await fetchWithAuth('/api/v1/tasks/', {
+                method: 'POST', body: JSON.stringify(payload)
+            });
+            
+            if (!response.ok) {
+                let errorDetail = `HTTP Fehler: ${response.status} ${response.statusText}`;
+                try { const errorData = await response.json(); errorDetail = errorData.detail || errorDetail;
+                } catch (e) { /* no JSON in error */ }
+                // console.error("[createNewTask] API Fehler:", errorDetail, "Status:", response.status);
+                throw new Error(errorDetail);
+            }
+            
+            const newTask = await response.json();
+            // console.log("[createNewTask] Aufgabe erfolgreich von API erstellt:", newTask);
+            if (!newTask || typeof newTask.id === 'undefined') {
+                // console.error("[createNewTask] API hat keine gültige Aufgabe mit ID zurückgegeben:", newTask);
+                throw new Error("Antwort vom Server war ungültig nach Aufgabenerstellung.");
+            }
+            displayMessage('Aufgabe erfolgreich erstellt!', 'success');
+            allTasksCache.push(newTask);
+            // console.log("[createNewTask] Aufgabe zum Cache hinzugefügt. Cache Größe:", allTasksCache.length);
+            populateTaskSelect(projectId.toString()); 
+            const taskSelectElement = document.getElementById('aufgabe_id');
+            taskSelectElement.value = newTask.id.toString();
+            // console.log(`[createNewTask] Versuche Aufgabe ${newTask.id} im Dropdown auszuwählen. Aktueller Wert: ${taskSelectElement.value}`);
+            if (taskSelectElement.value !== newTask.id.toString()) {
+                // console.warn(`[createNewTask] Auswahl der neuen Aufgabe ${newTask.id} fehlgeschlagen.`);
+            }
+        } catch (error) {
+            console.error('[createNewTask] Fehler beim Erstellen der Aufgabe:', error);
+            displayMessage(`Fehler beim Erstellen der Aufgabe: ${error.message || 'Unbekannter Fehler.'}`);
+        }
+    }
+    
+    function formatDate(dateString) {
+        if (!dateString) return '-';
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return '-'; 
+        return date.toLocaleDateString('de-DE', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    }
+
+    function formatTime(timeString) {
+        if (!timeString) return '-';
+        const parts = timeString.split(':');
+        if (parts.length >= 2) {
+            return `${parts[0].padStart(2, '0')}:${parts[1].padStart(2, '0')}`;
+        }
+        return '-'; 
+    }
+
+    async function fetchTimeEntries(page = 1) {
+        const tbody = document.getElementById('time-entries-tbody');
+        try {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Lade Zeiteinträge...</td></tr>';
+            const response = await fetchWithAuth(`/api/v1/time-entries/?skip=${(page - 1) * itemsPerPage}&limit=${itemsPerPage}`);
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({detail: "Unbekannter Fehler beim Laden der Zeiteinträge."}));
+                throw new Error(errorData.detail || `Fehler: ${response.statusText}`);
+            }
+            const result = await response.json();
+            const timeEntries = Array.isArray(result) ? result : (result.items || []);
+            tbody.innerHTML = ''; 
+            if (timeEntries.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Keine Zeiteinträge gefunden.</td></tr>';
+                updatePaginationControls((page - 1) * itemsPerPage + timeEntries.length, page, false); 
+                return;
+            }
+
+            let totalHoursToday = 0;
+            const today = new Date().toISOString().split('T')[0];
+
+            timeEntries.forEach(entry => {
+                const row = tbody.insertRow();
+                row.insertCell().textContent = entry.id;
+                row.insertCell().textContent = entry.projekt ? entry.projekt.name : (entry.projekt_name || entry.projekt_id || 'N/A'); 
+                row.insertCell().textContent = entry.aufgabe ? entry.aufgabe.name : (entry.aufgabe_name || entry.aufgabe_id || 'N/A');
+                row.insertCell().textContent = formatDate(entry.datum);
+                row.insertCell().textContent = formatTime(entry.startzeit);
+                row.insertCell().textContent = formatTime(entry.endzeit);
+                row.insertCell().textContent = entry.beschreibung || '';
+
+                // Calculate hours for this entry
+                const hours = BBQNotifications.calculateHours(
+                    entry.startzeit,
+                    entry.endzeit,
+                    entry.datum
+                );
+
+                // Add visual indicator for entries over 8 hours
+                if (hours > 8) {
+                    row.style.backgroundColor = '#e3f2fd';
+                    row.title = 'Dieser Eintrag überschreitet 8 Stunden Arbeitszeit';
+                }
+
+                // Sum up hours for today
+                if (entry.datum === today) {
+                    totalHoursToday += hours;
+                }
+
+                const actionsCell = row.insertCell();
+                const deleteButton = document.createElement('button');
+                deleteButton.innerHTML = '<i class="fas fa-trash"></i> Löschen';
+                deleteButton.classList.add('danger'); 
+                deleteButton.onclick = () => deleteTimeEntry(entry.id);
+                actionsCell.appendChild(deleteButton);
+            });            // For existing entries, we just track the total hours without showing notifications
+            // The notification will only show when adding a new entry that exceeds 8 hours
+
+            let hasMorePotential = timeEntries.length === itemsPerPage;
+            updatePaginationControls((page - 1) * itemsPerPage + timeEntries.length, page, hasMorePotential);
+        } catch (error) {
+            console.error('Fehler beim Laden der Zeiteinträge:', error);
+            displayMessage(error.message || 'Zeiteinträge konnten nicht geladen werden.', 'error');
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Fehler beim Laden der Zeiteinträge.</td></tr>';
+        }
+    }
+
+    async function deleteTimeEntry(entryId) {
+        if (!confirm('Sind Sie sicher, dass Sie diesen Zeiteintrag löschen möchten?')) return;
+        try {
+            displayMessage('Lösche Zeiteintrag...', 'info');
+            const response = await fetchWithAuth(`/api/v1/time-entries/${entryId}`, { method: 'DELETE' });
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({detail: "Unbekannter Fehler beim Löschen."}));
+                throw new Error(errorData.detail || `Fehler: ${response.statusText}`);
+            }
+            displayMessage('Zeiteintrag erfolgreich gelöscht.', 'success');
+            const tbody = document.getElementById('time-entries-tbody');
+            // Annahme: timeEntries ist eine globale Variable oder wird anderweitig korrekt aktualisiert, um die Anzahl der aktuellen Einträge zu kennen.
+            // Für eine robustere Lösung könnte man die Anzahl der Zeilen im tbody prüfen.
+            if (currentPage > 1 && tbody.rows.length === 0) { // Wenn die Seite leer wird und es nicht die erste ist
+                 currentPage--;
+            }
+            fetchTimeEntries(currentPage); 
+        } catch (error) {
+            console.error('Fehler beim Löschen des Zeiteintrags:', error);
+            displayMessage(error.message || 'Zeiteintrag konnte nicht gelöscht werden.', 'error');
+        }
+    }
+
+    function updatePaginationControls(totalItemsApproximation, page, hasMorePotential) {
+        const paginationControls = document.getElementById('pagination-controls');
+        paginationControls.innerHTML = ''; 
+        const paginationContainer = document.createElement('div');
+        Object.assign(paginationContainer.style, {
+            display: 'flex', gap: '10px', justifyContent: 'center',
+            alignItems: 'center', marginTop: '20px'
+        });
+        if (page > 1) {
+            const prevButton = document.createElement('button');
+            prevButton.innerHTML = '<i class="fas fa-chevron-left"></i> Zurück';
+            prevButton.classList.add('primary');
+            prevButton.onclick = () => { currentPage--; fetchTimeEntries(currentPage); };
+            paginationContainer.appendChild(prevButton);
+        }
+        const pageInfo = document.createElement('span');
+        pageInfo.textContent = `Seite ${page}`;
+        Object.assign(pageInfo.style, { margin: "0 10px", fontWeight: "bold" });
+        paginationContainer.appendChild(pageInfo);
+        if (hasMorePotential) {
+            const nextButton = document.createElement('button');
+            nextButton.innerHTML = 'Weiter <i class="fas fa-chevron-right"></i>';
+            nextButton.classList.add('primary');
+            nextButton.onclick = () => { currentPage++; fetchTimeEntries(currentPage); };
+            paginationContainer.appendChild(nextButton);
+        }
+        paginationControls.appendChild(paginationContainer);
+        const countInfo = document.createElement('div');
+        Object.assign(countInfo.style, {
+            textAlign: 'center', marginTop: '10px', fontSize: '0.9em', color: '#666'
+        });
+        countInfo.textContent = `Angezeigt werden bis zu ${itemsPerPage} Einträge pro Seite.`;
+        paginationControls.appendChild(countInfo);
+    }
+
+    document.getElementById('add-time-entry-form').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+        const projektId = formData.get('projekt_id');
+        const aufgabeId = formData.get('aufgabe_id');
+        const datum = formData.get('datum');
+        const startzeit = formData.get('startzeit');
+        const endzeit = formData.get('endzeit');
+        const beschreibung = formData.get('beschreibung') || '';
+
+        const data = {
+            projekt_id: parseInt(projektId),
+            aufgabe_id: parseInt(aufgabeId),
+            datum,
+            startzeit,
+            endzeit,
+            beschreibung,
+            stunden: null // Will be calculated by the backend
+        };
+
+        if (isNaN(data.projekt_id) || data.projekt_id <= 0 || projektId === "new") {
+            displayMessage('Bitte wählen Sie ein gültiges Projekt.', 'warning');
+            document.getElementById('projekt_id').focus();
+            return;
+        }
+        if (isNaN(data.aufgabe_id) || data.aufgabe_id <= 0 || aufgabeId === "new") {
+            displayMessage('Bitte wählen Sie eine gültige Aufgabe.', 'warning');
+            document.getElementById('aufgabe_id').focus();
+            return;
+        }
+        if (!data.datum || !data.startzeit || !data.endzeit) {
+            displayMessage('Bitte füllen Sie Datum, Start- und Endzeit aus.', 'warning');
+            if(!data.datum) document.getElementById('datum').focus();
+            else if(!data.startzeit) document.getElementById('startzeit').focus();
+            else document.getElementById('endzeit').focus();
+            return;
+        }
+
+        const startTime = new Date(`1970-01-01T${data.startzeit}`);
+        const endTime = new Date(`1970-01-01T${data.endzeit}`);
+        if (endTime <= startTime) {
+            displayMessage('Die Endzeit muss nach der Startzeit liegen.', 'warning');
+            document.getElementById('endzeit').focus();
+            return;
+        }
+
+        const hours = BBQNotifications.calculateHours(data.startzeit, data.endzeit, data.datum);
+        
+        // Show overtime warning if needed
+        if (hours > 12) {
+            if (!confirm('Die eingetragene Arbeitszeit überschreitet deutlich die empfohlenen Grenzen. Möchten Sie den Eintrag dennoch speichern?')) {
+                return;
+            }
+        }
+
+        const submitButton = this.querySelector('button[type="submit"]');
+        const originalButtonHTML = submitButton.innerHTML;
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Wird gespeichert...';
+        
+        try {
+            const response = await fetchWithAuth('/api/v1/time-entries/', {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({detail: "Unbekannter Fehler beim Speichern."}));
+                throw new Error(errorData.detail || `Fehler: ${response.statusText}`);
+            }
+
+            displayMessage('Zeiteintrag erfolgreich hinzugefügt.', 'success');
+            this.reset(); // Reset form fields
+            document.getElementById('datum').valueAsDate = new Date(); // Reset date to today
+            fetchTimeEntries(currentPage); // Refresh the table
+
+            const projectSelect = document.getElementById('projekt_id');
+            if (projectSelect) {
+                projectSelect.value = projektId; // Keep the same project selected
+                await populateTaskSelect(projektId); // Reload tasks for the current project
+            }            // Show the witty notification after successful save if overtime and this is a new entry
+            BBQNotifications.checkHoursAndNotify(hours, true);
+        } catch (error) {
+            console.error('Fehler beim Hinzufügen des Zeiteintrags:', error);
+            displayMessage(error.message || 'Zeiteintrag konnte nicht hinzugefügt werden.', 'error');
+        } finally {
+            submitButton.disabled = false;
+            submitButton.innerHTML = originalButtonHTML;
+        }
+    });
+    
+    document.getElementById('startzeit').addEventListener('input', calculateHours);
+    document.getElementById('endzeit').addEventListener('input', calculateHours);
+    
+    function checkForOvertime(date, startTime, endTime) {
+        const timeThresholds = {
+            standardDay: 8, // Standard working hours per day
+            warning: 10,    // Hours that trigger a warning
+            critical: 12    // Hours that trigger a critical warning
+        };
+
+        const start = new Date(`${date}T${startTime}`);
+        const end = new Date(`${date}T${endTime}`);
+        const diffHours = (end - start) / (1000 * 60 * 60);
+
+        if (diffHours > timeThresholds.critical) {
+            return {
+                message: `Warnung: ${diffHours.toFixed(1)} Stunden überschreiten die maximal empfohlene Arbeitszeit von ${timeThresholds.critical} Stunden deutlich!`,
+                type: 'error'
+            };
+        } else if (diffHours > timeThresholds.warning) {
+            return {
+                message: `Hinweis: ${diffHours.toFixed(1)} Stunden überschreiten die reguläre Arbeitszeit von ${timeThresholds.warning} Stunden.`,
+                type: 'warning'
+            };
+        } else if (diffHours > timeThresholds.standardDay) {
+            return {
+                message: `Information: ${diffHours.toFixed(1)} Stunden überschreiten die Standard-Arbeitszeit von ${timeThresholds.standardDay} Stunden.`,
+                type: 'info'
+            };
+        }
+        return null;
+    }
+    
+    function calculateHours() {
+        const startzeitValue = document.getElementById('startzeit').value;
+        const endzeitValue = document.getElementById('endzeit').value;
+        let durationInfoDiv = document.getElementById('duration-info');
+
+        if (startzeitValue && endzeitValue) {
+            if (!/^\d{2}:\d{2}(:\d{2})?$/.test(startzeitValue) || !/^\d{2}:\d{2}(:\d{2})?$/.test(endzeitValue)) {
+                 if (durationInfoDiv) durationInfoDiv.textContent = 'Ungültiges Zeitformat (HH:MM).';
+                 return;
+            }
+            const start = new Date(`2000-01-01T${startzeitValue}`); 
+            const end = new Date(`2000-01-01T${endzeitValue}`);
+            if (isNaN(start.getTime()) || isNaN(end.getTime())) { 
+                if (durationInfoDiv) durationInfoDiv.textContent = 'Ungültige Zeitangabe.';
+                return;
+            }
+            if (end <= start) {
+                if (durationInfoDiv) {
+                    durationInfoDiv.textContent = 'Endzeit muss nach Startzeit liegen.';
+                    durationInfoDiv.style.color = 'red';
+                }
+                return;
+            }
+            const diffMs = end - start;
+            const diffHours = diffMs / (1000 * 60 * 60);
+            if(durationInfoDiv) {
+                durationInfoDiv.textContent = `Dauer: ${diffHours.toFixed(2)} Stunden`;
+                durationInfoDiv.style.color = 'initial'; 
+            }
+
+            // Use BBQNotifications for witty overtime messages
+            const datumValue = document.getElementById('datum').value;
+            const hours = BBQNotifications.calculateHours(startzeitValue, endzeitValue, datumValue);
+            BBQNotifications.checkHoursAndNotify(hours);
+        } else if (durationInfoDiv) {
+            durationInfoDiv.textContent = ''; 
+        }
+    }
+
+    function logout() {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('currentUser');
+        sessionStorage.clear(); 
+        document.cookie.split(";").forEach(function(c) {
+            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+        });
+        if (window.location.pathname !== '/Login.html' && window.location.pathname !== '/login.html') {
+             window.location.href = '/Login.html'; 
+        }
+    }
+
+    function updateNavigationBasedOnRole(userData) {
+        const adminLinkRoles = document.getElementById('adminLinkRoles');
+        const adminLinkUsers = document.getElementById('adminLinkUsers');
+        if (!adminLinkRoles || !adminLinkUsers) {
+            console.error("Admin-Menüpunkte nicht im DOM gefunden!");
+            return { isAdmin: false, isManager: false };
+        }
+        adminLinkRoles.style.display = 'none';
+        adminLinkUsers.style.display = 'none';
+        let isAdmin = (userData && (userData.role_id === 1 || (userData.rolle && userData.rolle.name === 'Administrator')));
+        let isManager = (userData && (userData.role_id === 2 || (userData.rolle && userData.rolle.name === 'Manager')));
+        if (isAdmin || isManager) {
+            adminLinkRoles.style.display = ''; 
+        }
+        if (isAdmin) {
+            adminLinkUsers.style.display = ''; 
+        }
+        return { isAdmin, isManager };
+    }
+
+    async function checkUserRole() {
+        if (!localStorage.getItem('accessToken')) {
+            if (window.location.pathname !== '/login.html' && window.location.pathname !== '/Login.html') {
+                window.location.href = '/login.html';
+            }
+            return null;
+        }
+        try {
+            const response = await fetchWithAuth('/api/v1/users/me');
+            if (response.ok) {
+                const userData = await response.json();
+                localStorage.setItem('currentUser', JSON.stringify(userData)); 
+                const permissions = updateNavigationBasedOnRole(userData);
+                return { ...userData, ...permissions };
+            } else {
+                logout(); 
+                return null;
+            }
+        } catch (error) {
+            console.error('Error fetching user role:', error);
+            logout(); 
+            return null;
+        }
+    }
+    
+    let globalIsAdmin = false;
+    let globalIsManager = false;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        if (!token && window.location.pathname !== '/login.html' && window.location.pathname !== '/Login.html') {
+            window.location.href = '/login.html'; return;
+        }
+        document.getElementById('datum').valueAsDate = new Date();
+        calculateHours(); 
+        const loadingOverlay = document.createElement('div');
+        loadingOverlay.className = 'loading-overlay'; 
+        loadingOverlay.innerHTML = '<div><i class="fas fa-spinner fa-spin fa-3x"></i><p style="margin-top:10px;">Daten werden geladen...</p></div>';
+        document.body.appendChild(loadingOverlay);
+        try {
+            const user = await checkUserRole();
+            if (user) {
+                globalIsAdmin = user.isAdmin;
+                globalIsManager = user.isManager;
+                await fetchProjects();      
+                await fetchAllTasksOnce();  
+                await fetchTimeEntries(currentPage);
+            } else {
+                 if (window.location.pathname !== '/login.html' && window.location.pathname !== '/Login.html') {
+                    displayMessage("Benutzerdaten konnten nicht geladen werden. Bitte erneut anmelden.", "error");
+                 }
+            }
+        } catch (error) {
+            console.error("Fehler beim Initialisieren der Seite:", error);
+            displayMessage("Schwerwiegender Fehler beim Laden der Seite: " + error.message, "error");
+        } finally {
+            if (document.body.contains(loadingOverlay)) {
+                 document.body.removeChild(loadingOverlay);
+            }
+        }
+    });
+    
+    document.getElementById('add-project-btn').addEventListener('click', function() {
+        const projectName = prompt('Name des neuen Projekts:');
+        if (projectName && projectName.trim()) {
+            createNewProject(projectName.trim());
+        }
+    });
+
+    document.getElementById('delete-project-btn').addEventListener('click', async function() {
+        const projectSelect = document.getElementById('projekt_id');
+        const selectedProjectId = projectSelect.value;
+        if (!selectedProjectId || selectedProjectId === "new" || selectedProjectId === "") {
+            displayMessage('Bitte wählen Sie ein Projekt zum Löschen aus.', 'warning'); return;
+        }
+        if (confirm(`Sind Sie sicher, dass Sie das Projekt "${projectSelect.options[projectSelect.selectedIndex].text}" löschen möchten? Alle zugehörigen Aufgaben und Zeiteinträge könnten ebenfalls gelöscht werden!`)) {
+            try {
+                const response = await fetchWithAuth(`/api/v1/projects/${selectedProjectId}`, { method: 'DELETE' });
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ detail: `HTTP Fehler: ${response.status}` }));
+                    if (response.status === 403) throw new Error('Sie haben keine Berechtigung, Projekte zu löschen.');
+                    throw new Error(errorData.detail || `Fehler beim Löschen des Projekts.`);
+                }
+                displayMessage('Projekt erfolgreich gelöscht!', 'success');
+                await fetchProjects(); 
+                await fetchAllTasksOnce(); 
+                currentPage = 1; 
+                await fetchTimeEntries(currentPage); 
+            } catch (error) {
+                console.error('Fehler beim Löschen des Projekts:', error);
+                displayMessage(`Projekt konnte nicht gelöscht werden: ${error.message}`, 'error');
+            }
+        }
+    });
+
+    document.getElementById('add-task-btn').addEventListener('click', function() {
+        const projectId = document.getElementById('projekt_id').value;
+        if (!projectId || projectId === "new" || projectId === "") {
+            displayMessage('Bitte wählen Sie zuerst ein Projekt aus, um eine Aufgabe hinzuzufügen.', 'warning'); return;
+        }
+        const taskName = prompt('Name der neuen Aufgabe:');
+        if (taskName && taskName.trim()) {
+            createNewTask(taskName.trim(), projectId);
+        }
+    });
+
+    document.getElementById('delete-task-btn').addEventListener('click', async function() {
+        const taskSelect = document.getElementById('aufgabe_id');
+        const selectedTaskId = taskSelect.value;
+        if (!selectedTaskId || selectedTaskId === "new" || selectedTaskId === "") {
+            displayMessage('Bitte wählen Sie eine Aufgabe zum Löschen aus.', 'warning'); return;
+        }
+        if (confirm(`Sind Sie sicher, dass Sie die Aufgabe "${taskSelect.options[taskSelect.selectedIndex].text}" löschen möchten? Zugehörige Zeiteinträge könnten ebenfalls beeinflusst werden!`)) {
+            try {
+                const response = await fetchWithAuth(`/api/v1/tasks/${selectedTaskId}`, { method: 'DELETE' });
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ detail: `HTTP Fehler: ${response.status}` }));
+                    if (response.status === 403) throw new Error('Sie haben keine Berechtigung, Aufgaben zu löschen.');
+                    throw new Error(errorData.detail || `Fehler beim Löschen der Aufgabe.`);
+                }
+                displayMessage('Aufgabe erfolgreich gelöscht!', 'success');
+                await fetchAllTasksOnce(); 
+                currentPage = 1; 
+                await fetchTimeEntries(currentPage); 
+            } catch (error) {
+                console.error('Fehler beim Löschen der Aufgabe:', error);
+                displayMessage(`Aufgabe konnte nicht gelöscht werden: ${error.message}`, 'error');
+            }
+        }
+    });
+
+    const menuToggle = document.getElementById('menu-toggle');
+    const mainNav = document.querySelector('.main-nav');
+    if (menuToggle && mainNav) {
+        menuToggle.addEventListener('click', () => {
+            const isActive = mainNav.classList.toggle('active');
+            menuToggle.classList.toggle('active', isActive); 
+            menuToggle.setAttribute('aria-expanded', isActive.toString());
+            const icon = menuToggle.querySelector('i');
+            if (isActive) {
+                icon.classList.remove('fa-bars'); icon.classList.add('fa-times');
+            } else {
+                icon.classList.remove('fa-times'); icon.classList.add('fa-bars');
+            }
+        });
+    } else {
+        console.warn("Menu toggle oder main nav nicht gefunden.");
+    }
+</script>
+<script src="/static/js/nav.js"></script> 
+</body>
+</html>

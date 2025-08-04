@@ -1,0 +1,58 @@
+version: '3.8' # Specify a more recent version for better features
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: zeiterfassung_web
+    # For development, mount the current directory to the container for live reloading
+    # For production, you would typically not mount the source code directly
+    volumes:
+      - .:/app # Mounts current directory into /app in container
+    ports:
+      - "${APP_PORT:-8000}:8000" # Host port:Container port, configurable via .env
+    env_file:
+      - .env # Loads environment variables from .env file
+    environment:
+      # Ensure PYTHONPATH is set if not already in Dockerfile or if needed for specific entrypoints
+      - PYTHONPATH=/app
+      # Email configuration
+      - EMAIL_ENABLED=${EMAIL_ENABLED:-false}
+      - SMTP_SERVER=${SMTP_SERVER:-smtp.strato.de}
+      - SMTP_PORT=${SMTP_PORT:-465}
+      - SMTP_USERNAME=${SMTP_USERNAME:-webmaster@zaksprojects.de}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-Zaka123123!!}
+      - SENDER_EMAIL=${SENDER_EMAIL:-webmaster@zaksprojects.de}
+      - SENDER_NAME=${SENDER_NAME:-BBQ GmbH Zeiterfassung}
+      - APP_URL=${APP_URL:-http://localhost:8000}
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      # Database connection details are loaded from .env via env_file
+    depends_on:
+      db:
+        condition: service_healthy # Waits for db to be healthy before starting web
+    restart: unless-stopped
+    # user: "appuser:appgroup" # Run as non-root user defined in Dockerfile (important for security)
+
+  db:
+    image: postgres:15-alpine # Using a specific, recent version of PostgreSQL
+    container_name: zeiterfassung_db
+    env_file:
+      - .env # Loads POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB from .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/ # Persistent storage for database
+    ports:
+      # Maps host port (from .env or default 5432) to container port (5432)
+      - "${DB_HOST_PORT:-5433}:5432"
+    healthcheck:
+      # Test command checks if PostgreSQL is ready to accept connections
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-user} -d ${POSTGRES_DB:-db} -q"]
+      interval: 10s   # How often to run the check
+      timeout: 5s     # How long to wait for a response
+      retries: 5      # How many times to retry before marking as unhealthy
+      start_period: 10s # Grace period for the container to start before health checks begin
+    restart: unless-stopped
+
+volumes:
+  postgres_data: # Defines the named volume for data persistence
+    driver: local # Explicitly define driver, though 'local' is default

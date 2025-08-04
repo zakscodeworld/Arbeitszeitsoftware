@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benutzerverwaltung - BBQ GmbH Zeiterfassung</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/nav-styles.css">
+    <link rel="stylesheet" href="/static/footer-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" href="/static/images/BBQGmbH.png" type="image/png">
+    <style>
+        /* Styles für die Benutzerverwaltung */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.4); 
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto; 
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            width: 80%; 
+            max-width: 500px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: #333;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        .user-filter {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .user-filter select, .user-filter input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        /* Message-Anzeige */
+        #message-area {
+            margin-bottom: 20px;
+        }
+        
+        .message {
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .message.error {
+            background-color: #ffebee;
+            border-left: 4px solid #f44336;
+        }
+        
+        .message.success {
+            background-color: #e8f5e9;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .message.warning {
+            background-color: #fff8e1;
+            border-left: 4px solid #ff9800;
+        }
+        
+        .message.info {
+            background-color: #e3f2fd;
+            border-left: 4px solid #2196f3;
+        }
+          /* Verbesserte Button-Styles */
+        button {
+            cursor: pointer;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        button.primary {
+            background-color: #2196f3;
+            color: white;
+        }
+        
+        button.secondary {
+            background-color: #f5f5f5;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+        
+        button.danger {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        /* Neue Styles für Filter, Debug und Edit Buttons */
+        .user-filter button, 
+        #debug-panel button,
+        #userList button:not(.danger) {
+            background-color: #4a86e8;
+            color: white;
+            border: none;
+        }
+        
+        .user-filter button:hover, 
+        #debug-panel button:hover,
+        #userList button:not(.danger):hover {
+            background-color: #3a76d8;
+        }
+        
+        /* Modal cancel button should not be blue */
+        .modal button[type="button"] {
+            background-color: #f8f8f8;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+        
+        .modal button[type="button"]:hover {
+            background-color: #e8e8e8;
+        }
+        
+        /* Verbesserte Tabellendarstellung */
+        .table-wrapper {
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        table th, table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        table th {
+            background-color: #f5f5f5;
+            font-weight: bold;
+        }
+        
+        table tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        /* Debug-Panel */
+        #debug-panel {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        #debug-panel pre {
+            background-color: #eee;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            max-height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <button id="menu-toggle" class="menu-toggle" aria-label="Toggle menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="logo-container">
+            <img src="/static/images/BBQGmbH.png" alt="BBQ GmbH Logo">
+            <h1>BBQ GmbH Zeiterfassung</h1>
+        </div>
+        <nav class="main-nav">
+            <ul>                <li><a href="/index.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="/arbeitszeiten.html"><i class="fas fa-clock"></i> Arbeitszeiten</a></li>
+                <li><a href="/urlaub.html"><i class="fas fa-calendar-alt"></i> Urlaub/Abwesenheiten</a></li>
+                <li><a href="/urlaube/genehmigen" id="adminLinkApprovals"><i class="fas fa-check-circle"></i> Urlaubsgenehmigungen</a></li>
+                <li><a href="/rollen.html" id="adminLinkRoles"><i class="fas fa-user-shield"></i> Rollenverwaltung</a></li>
+                <li><a href="/admin_benutzer.html" id="adminLinkUsers" class="active"><i class="fas fa-users-cog"></i> Benutzerverwaltung</a></li>
+                <li><a href="/info.html"><i class="fas fa-info-circle"></i> Info</a></li>
+                <li><a href="/hilfe.html"><i class="fas fa-question-circle"></i> Hilfe</a></li>
+                <li><a href="/passwort.html"><i class="fas fa-key"></i> Passwort ändern</a></li>
+                <li><button class="logout-button" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Benutzerverwaltung</h1>
+        </div>
+        
+        <!-- Message-Bereich für Benachrichtigungen -->
+        <div id="message-area"></div>
+        
+        <div class="card">
+            <h2>Benutzerliste</h2>
+            <div class="card-content">
+                <div class="user-filter">
+                    <label for="roleFilter">Rolle:</label>
+                    <select id="roleFilter">
+                        <option value="">Alle Rollen</option>
+                        <!-- Will be populated from API -->
+                    </select>
+                    
+                    <label for="searchFilter">Suche:</label>
+                    <input type="text" id="searchFilter" placeholder="Name oder Email">
+                    
+                    <button onclick="filterUsers()" class="primary">Filtern</button>
+                    <button onclick="resetFilters()">Zurücksetzen</button>
+                    <button onclick="toggleDebugPanel()" title="Debug-Modus ein/ausschalten">Debug</button>
+                </div>
+                
+                <!-- Debug-Panel für Entwicklung und Fehlerbehebung -->
+                <div id="debug-panel">
+                    <h3>Debug-Panel</h3>
+                    <div>
+                        <button onclick="testApiConnection()">API-Test</button>
+                        <button onclick="inspectToken()">Token prüfen</button>
+                        <button onclick="refreshUserList()">Benutzer neu laden</button>
+                    </div>
+                    <pre id="debug-output">Debug-Ausgaben werden hier angezeigt...</pre>
+                </div>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Benutzername</th>
+                                <th>E-Mail</th>
+                                <th>Vorname</th>
+                                <th>Nachname</th>
+                                <th>Rolle</th>
+                                <th>Aktiv</th>
+                                <th>Aktionen</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userList">
+                            <!-- User data will be populated here by JavaScript -->
+                            <tr>
+                                <td colspan="8" style="text-align: center;">Lade Benutzer...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-actions">
+                <button onclick="openCreateUserModal()" class="primary">Neuen Benutzer erstellen</button>
+            </div>
+        </div>
+
+        <!-- Create/Edit User Modal -->
+        <div id="userModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" onclick="closeUserModal()">&times;</span>
+                <h2 id="modalTitle">Benutzer bearbeiten</h2>
+                <form id="userForm">
+                    <input type="hidden" id="userId" name="id">
+                    <div>
+                        <label for="username">Benutzername:</label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+                    <div>
+                        <label for="email">E-Mail:</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div>
+                        <label for="vorname">Vorname:</label>
+                        <input type="text" id="vorname" name="vorname">
+                    </div>
+                    <div>
+                        <label for="nachname">Nachname:</label>
+                        <input type="text" id="nachname" name="nachname">
+                    </div>
+                    <div id="passwordSection">
+                        <label for="passwort">Passwort:</label>
+                        <input type="password" id="passwort" name="passwort">
+                        <small>(Bei Bearbeitung leer lassen, um nicht zu ändern)</small>
+                    </div>
+                    <div>
+                        <label for="rolle_id">Rolle:</label>
+                        <select id="rolle_id" name="rolle_id" required>
+                            <!-- Roles will be populated here -->
+                        </select>
+                    </div>
+                    <div>
+                        <label for="ist_aktiv">Aktiv:</label>
+                        <input type="checkbox" id="ist_aktiv" name="ist_aktiv" checked>
+                    </div>
+                    <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+                        <button type="button" onclick="closeUserModal()">Abbrechen</button>
+                        <button type="submit" class="primary">Speichern</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Über uns</h3>
+                <p>BBQ GmbH ist ein führender Anbieter von Bildungs- und Beratungslösungen für Unternehmen und Institutionen.</p>
+                <div class="social-links">
+                    <a href="/404.html?feature=social" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="/404.html?feature=social" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="/404.html?feature=social" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="/404.html?feature=social" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3>Kontakt</h3>
+                <p><i class="fas fa-map-marker-alt"></i> Digitalstraße 42, 10115 Berlin</p>
+                <p><i class="fas fa-phone"></i> +49 30 12345678</p>
+                <p><i class="fas fa-envelope"></i> info@bbqgmbh-projekt.de</p>
+            </div>
+            <div class="footer-section">
+                <h3>Links</h3>
+                <ul>
+                    <li><a href="/info.html">Über uns</a></li>
+                    <li><a href="/hilfe.html">Hilfe & Support</a></li>
+                    <li><a href="/datenschutz.html">Datenschutz</a></li>
+                    <li><a href="/impressum.html">Impressum</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright-bar">
+            <p>&copy; 2025 BBQ GmbH Zeiterfassungssystem. Alle Rechte vorbehalten.</p>
+        </div>
+    </footer>    <script>
+        // ============================
+        // KONFIGURATIONS-VARIABLEN
+        // ============================
+        const API_BASE_URL = '/api/v1';
+        let debugMode = false;
+        let rolesCache = [];
+        let currentUsers = [];
+        
+        // ============================
+        // HILFSFUNKTIONEN
+        // ============================
+        
+        // Nachrichten anzeigen
+        function showMessage(message, type = 'info', duration = 5000) {
+            const messageArea = document.getElementById('message-area');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.innerHTML = message;
+            
+            messageArea.appendChild(messageDiv);
+            
+            // Nachricht nach bestimmter Zeit ausblenden
+            if (duration > 0) {
+                setTimeout(() => {
+                    messageDiv.style.opacity = '0';
+                    messageDiv.style.transition = 'opacity 0.5s';
+                    setTimeout(() => messageDiv.remove(), 500);
+                }, duration);
+            }
+            
+            return messageDiv;
+        }
+        
+        // Fehlerbehandlung für API-Anfragen
+        async function handleApiError(response, errorMessage = 'Ein Fehler ist aufgetreten') {
+            let error = errorMessage;
+            
+            try {
+                const errorData = await response.json();
+                
+                // Check for validation errors and constraints
+                if (response.status === 400) {
+                    const detail = errorData.detail || "";
+                    if (detail.includes("E-Mail-Adresse") || detail.includes("email")) {
+                        error = errorData.detail || "Diese E-Mail-Adresse wird bereits verwendet.";
+                    } else if (detail.includes("Benutzername") || detail.includes("username")) {
+                        error = errorData.detail || "Dieser Benutzername wird bereits verwendet.";
+                    } else {
+                        error = errorData.detail || "Eingabefehler: Bitte überprüfen Sie die eingegebenen Daten.";
+                    }
+                } else {
+                    error = errorData.message || errorData.detail || errorMessage;
+                }
+            } catch (e) {
+                if (response.status === 500) {
+                    error = "Interner Serverfehler: Die Aktion konnte nicht durchgeführt werden.";
+                    if (response.statusText.includes("duplicate key")) {
+                        error = "Diese E-Mail oder der Benutzername existiert bereits. Bitte wählen Sie einen anderen.";
+                    }
+                } else {
+                    error = `${errorMessage}: ${response.statusText}`;
+                }
+            }
+            
+            logDebug('API-Fehler:', { status: response.status, error });
+            showMessage(error, 'error');
+            return false;
+        }
+
+        // Verbesserte Logging-Funktion
+        function logDebug(message, data = null) {
+            if (debugMode || data?.force) {
+                const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
+                console.log(`[${timestamp}] 🔍 ${message}`);
+                if (data && data !== true) {
+                    console.log('📦 Daten:', data);
+                    
+                    const debugOutput = document.getElementById('debug-output');
+                    if (debugOutput) {
+                        const existingContent = debugOutput.textContent;
+                        const newContent = `[${timestamp}] ${message}\n${JSON.stringify(data, null, 2)}\n\n`;
+                        debugOutput.textContent = newContent + existingContent;
+                    }
+                }
+            }
+        }
+        
+        // Debug-Ausgabe
+        function log(message, data = null) {
+            if (debugMode) {
+                console.log(`[DEBUG] ${message}`, data);
+                
+                // Auch im Debug-Panel anzeigen
+                const debugOutput = document.getElementById('debug-output');
+                if (debugOutput) {
+                    const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
+                    const debugEntry = `[${timestamp}] ${message}\n`;
+                    const dataString = data ? JSON.stringify(data, null, 2) + '\n\n' : '\n';
+                    debugOutput.textContent = debugEntry + dataString + debugOutput.textContent;
+                }
+            }
+        }
+        
+        // Debug-Panel ein-/ausblenden
+        function toggleDebugPanel() {
+            const panel = document.getElementById('debug-panel');
+            if (panel) {
+                if (panel.style.display === 'block') {
+                    panel.style.display = 'none';
+                    debugMode = false;
+                } else {
+                    panel.style.display = 'block';
+                    debugMode = true;
+                }
+            }
+            log('Debug-Modus ' + (debugMode ? 'aktiviert' : 'deaktiviert'));
+        }
+        
+        // API-Test durchführen
+        async function testApiConnection() {
+            log('Starte API-Test...');
+            showMessage('API-Test läuft...', 'info', 2000);
+            
+            try {
+                // Teste verschiedene Endpunkte
+                const usersMeResponse = await fetch(`${API_BASE_URL}/users/me`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` }
+                });
+                
+                const usersResponse = await fetch(`${API_BASE_URL}/users/`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` }
+                });
+                
+                const rolesResponse = await fetch(`${API_BASE_URL}/roles/`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('accessToken')}` }
+                });
+                
+                const results = {
+                    me: {
+                        status: usersMeResponse.status,
+                        ok: usersMeResponse.ok,
+                        statusText: usersMeResponse.statusText
+                    },
+                    users: {
+                        status: usersResponse.status,
+                        ok: usersResponse.ok,
+                        statusText: usersResponse.statusText
+                    },
+                    roles: {
+                        status: rolesResponse.status,
+                        ok: rolesResponse.ok,
+                        statusText: rolesResponse.statusText
+                    }
+                };
+                
+                log('API-Test Ergebnisse:', results);
+                
+                // Zeige zusammenfassendes Ergebnis
+                if (usersMeResponse.ok && usersResponse.ok && rolesResponse.ok) {
+                    showMessage('API-Test erfolgreich! Alle Endpunkte sind erreichbar.', 'success');
+                } else {
+                    showMessage('API-Test teilweise fehlgeschlagen. Siehe Debug-Panel für Details.', 'warning');
+                }
+                
+                return results;
+            } catch (error) {
+                log('API-Test fehlgeschlagen:', error);
+                showMessage(`API-Test fehlgeschlagen: ${error.message}`, 'error');
+                return { error: error.message };
+            }
+        }
+        
+        // Token prüfen
+        function inspectToken() {
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                log('Kein Token gefunden');
+                showMessage('Kein Zugriffstoken gefunden.', 'error');
+                return;
+            }
+            
+            try {
+                // Token-Teile extrahieren
+                const parts = token.split('.');
+                if (parts.length !== 3) {
+                    log('Ungültiges Token-Format');
+                    showMessage('Ungültiges Token-Format', 'error');
+                    return;
+                }
+                
+                // Payload dekodieren (Base64)
+                const payload = JSON.parse(atob(parts[1]));
+                
+                // Ablaufzeit prüfen
+                const now = Math.floor(Date.now() / 1000);
+                const isExpired = payload.exp && payload.exp < now;
+                
+                log('Token-Informationen:', {
+                    ...payload,
+                    isExpired,
+                    expiresIn: payload.exp ? new Date(payload.exp * 1000).toLocaleString() : 'Unbekannt'
+                });
+                
+                if (isExpired) {
+                    showMessage('Das Token ist abgelaufen. Bitte melden Sie sich erneut an.', 'error');
+                } else {
+                    showMessage('Token ist gültig.', 'success', 2000);
+                }
+                
+                return payload;
+            } catch (error) {
+                log('Fehler bei der Token-Analyse:', error);
+                showMessage(`Fehler bei der Token-Analyse: ${error.message}`, 'error');
+                return null;
+            }
+        }
+        
+        // ============================
+        // API-FUNKTIONEN
+        // ============================
+        
+        // Authentifizierte API-Anfragen senden
+        async function fetchWithAuth(url, options = {}) {
+            try {
+                const token = localStorage.getItem('accessToken');
+                if (!token) {
+                    log('Kein Token gefunden');
+                    showMessage('Keine Anmeldedaten gefunden. Bitte melden Sie sich an.', 'warning');
+                    setTimeout(() => {
+                        window.location.href = '/Login.html';
+                    }, 2000);
+                    return null;
+                }
+                
+                // Headers mit Token
+                const headers = {
+                    ...options.headers,
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                };
+                
+                log(`Sende ${options.method || 'GET'}-Anfrage an ${url}`, { headers });
+                
+                // Anfrage senden
+                const response = await fetch(url, { ...options, headers });
+                
+                log(`Antwort erhalten: ${response.status} ${response.statusText}`);
+                
+                // Bei Authentifizierungsfehlern ausloggen
+                if (response.status === 401 || response.status === 403) {
+                    log(`Authentifizierungsfehler: ${response.status}`);
+                    localStorage.removeItem('accessToken');
+                    showMessage('Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.', 'warning');
+                    setTimeout(() => {
+                        window.location.href = '/Login.html';
+                    }, 2000);
+                    return null;
+                }
+                
+                return response;
+            } catch (error) {
+                log('Fehler bei der API-Anfrage:', error);
+                showMessage(`Netzwerkfehler: ${error.message}`, 'error');
+                return null;
+            }
+        }
+        
+        // Benutzer laden
+        async function fetchUsers() {
+            try {
+                log('Lade Benutzer...');
+                
+                // Ladeindikator anzeigen
+                const userList = document.getElementById('userList');
+                userList.innerHTML = '<tr><td colspan="8" style="text-align: center;"><i class="fas fa-spinner fa-spin"></i> Lade Benutzer...</td></tr>';
+                
+                // API-Anfrage senden
+                const response = await fetchWithAuth(`${API_BASE_URL}/users/`);
+                
+                if (!response) {
+                    log('Keine Antwort erhalten');
+                    userList.innerHTML = '<tr><td colspan="8" style="text-align: center;">Fehler beim Laden der Benutzer. Keine Verbindung zur API.</td></tr>';
+                    return;
+                }
+                
+                if (response.ok) {
+                    const users = await response.json();
+                    log(`${users.length} Benutzer geladen`, users);
+                    
+                    // Benutzer speichern für Filterung
+                    currentUsers = users;
+                    
+                    // Benutzer anzeigen
+                    populateUserTable(users);
+                    
+                    return users;
+                } else {
+                    // Fehlerbehandlung
+                    let errorMessage = `Fehler: ${response.status} ${response.statusText}`;
+                    try {
+                        const errorData = await response.json();
+                        if (errorData.detail) {
+                            errorMessage = errorData.detail;
+                        }
+                    } catch (e) {
+                        // Ignorieren, wenn keine JSON-Antwort
+                    }
+                    
+                    log('Fehler beim Laden der Benutzer', { status: response.status, message: errorMessage });
+                    userList.innerHTML = `<tr><td colspan="8" style="text-align: center;">${errorMessage}</td></tr>`;
+                    showMessage(errorMessage, 'error');
+                }
+            } catch (error) {
+                log('Ausnahme beim Laden der Benutzer:', error);
+                document.getElementById('userList').innerHTML = `<tr><td colspan="8" style="text-align: center;">Fehler: ${error.message}</td></tr>`;
+                showMessage(`Fehler: ${error.message}`, 'error');
+            }
+        }
+        
+        // Benutzer neu laden (für Refresh-Button)
+        function refreshUserList() {
+            fetchUsers().then(() => {
+                showMessage('Benutzerliste aktualisiert', 'success', 2000);
+            });
+        }
+        
+        // Rollen laden
+        async function fetchRoles() {
+            try {
+                log('Lade Rollen...');
+                
+                const response = await fetchWithAuth(`${API_BASE_URL}/roles/`);
+                
+                if (!response) {
+                    log('Keine Antwort beim Laden der Rollen');
+                    showMessage('Fehler beim Laden der Rollen', 'error');
+                    return [];
+                }
+                
+                if (response.ok) {
+                    const roles = await response.json();
+                    log(`${roles.length} Rollen geladen`, roles);
+                    
+                    // Rollen speichern
+                    rolesCache = roles;
+                    
+                    // Dropdown-Menüs aktualisieren
+                    populateRoleSelect(document.getElementById('rolle_id'), roles);
+                    populateRoleFilterSelect(document.getElementById('roleFilter'), roles);
+                    
+                    return roles;
+                } else {
+                    // Fehlerbehandlung
+                    let errorMessage = `Fehler: ${response.status} ${response.statusText}`;
+                    try {
+                        const errorData = await response.json();
+                        if (errorData.detail) {
+                            errorMessage = errorData.detail;
+                        }
+                    } catch (e) {
+                        // Ignorieren, wenn keine JSON-Antwort
+                    }
+                    
+                    log('Fehler beim Laden der Rollen', { status: response.status, message: errorMessage });
+                    showMessage(errorMessage, 'error');
+                    return [];
+                }
+            } catch (error) {
+                log('Ausnahme beim Laden der Rollen:', error);
+                showMessage(`Fehler: ${error.message}`, 'error');
+                return [];
+            }
+        }
+        
+        // Benutzer erstellen/aktualisieren
+        async function saveUser(userData, isNew = false) {
+            try {
+                log(`${isNew ? 'Erstelle' : 'Aktualisiere'} Benutzer`, userData);
+                
+                // Methode und URL festlegen
+                const method = isNew ? 'POST' : 'PUT';
+                const url = isNew ? `${API_BASE_URL}/users/` : `${API_BASE_URL}/users/${userData.id}`;
+                
+                // Leeres Passwort entfernen, wenn nicht neu
+                if (!isNew && userData.passwort === '') {
+                    delete userData.passwort;
+                }
+                
+                // API-Anfrage senden
+                const response = await fetchWithAuth(url, {
+                    method,
+                    body: JSON.stringify(userData)
+                });
+                
+                if (!response) {
+                    log('Keine Antwort erhalten');
+                    showMessage('Fehler beim Speichern des Benutzers. Keine Verbindung zur API.', 'error');
+                    return false;
+                }
+                
+                if (response.ok) {
+                    const savedUser = await response.json();
+                    log('Benutzer gespeichert', savedUser);
+                    
+                    // Erfolgsmeldung
+                    showMessage(`Benutzer ${isNew ? 'erstellt' : 'aktualisiert'}.`, 'success');
+                    
+                    // Benutzerliste aktualisieren
+                    await fetchUsers();
+                    
+                    return true;
+                } else {
+                    // Fehlerbehandlung
+                    let errorMessage = `Fehler: ${response.status} ${response.statusText}`;
+                    try {
+                        const errorData = await response.json();
+                        if (errorData.detail) {
+                            errorMessage = errorData.detail;
+                        }
+                    } catch (e) {
+                        // Ignorieren, wenn keine JSON-Antwort
+                    }
+                    
+                    log('Fehler beim Speichern des Benutzers', { status: response.status, message: errorMessage });
+                    showMessage(errorMessage, 'error');
+                    return false;
+                }
+            } catch (error) {
+                log('Ausnahme beim Speichern des Benutzers:', error);
+                showMessage(`Fehler: ${error.message}`, 'error');
+                return false;
+            }
+        }
+        
+        // Benutzer löschen
+        async function deleteUser(userId, username) {
+            if (!confirm(`Möchten Sie den Benutzer "${username}" wirklich löschen?`)) {
+                return;
+            }
+            
+            try {
+                log(`Lösche Benutzer ${userId} (${username})`);
+                
+                const response = await fetchWithAuth(`${API_BASE_URL}/users/${userId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response) {
+                    log('Keine Antwort erhalten');
+                    showMessage('Fehler beim Löschen des Benutzers. Keine Verbindung zur API.', 'error');
+                    return false;
+                }
+                
+                if (response.ok || response.status === 204) {
+                    log('Benutzer gelöscht');
+                    
+                    // Erfolgsmeldung
+                    showMessage(`Benutzer "${username}" gelöscht.`, 'success');
+                    
+                    // Benutzerliste aktualisieren
+                    await fetchUsers();
+                    
+                    return true;
+                } else {
+                    // Fehlerbehandlung
+                    let errorMessage = `Fehler: ${response.status} ${response.statusText}`;
+                    try {
+                        const errorData = await response.json();
+                        if (errorData.detail) {
+                            errorMessage = errorData.detail;
+                        }
+                    } catch (e) {
+                        // Ignorieren, wenn keine JSON-Antwort
+                    }
+                    
+                    log('Fehler beim Löschen des Benutzers', { status: response.status, message: errorMessage });
+                    showMessage(errorMessage, 'error');
+                    return false;
+                }
+            } catch (error) {
+                log('Ausnahme beim Löschen des Benutzers:', error);
+                showMessage(`Fehler: ${error.message}`, 'error');
+                return false;
+            }
+        }
+        
+        // ============================
+        // UI-FUNKTIONEN
+        // ============================
+        
+        // Benutzertabelle befüllen
+        function populateUserTable(users) {
+            const userList = document.getElementById('userList');
+            userList.innerHTML = '';
+            
+            if (!Array.isArray(users) || users.length === 0) {
+                userList.innerHTML = '<tr><td colspan="8" style="text-align: center;">Keine Benutzer gefunden.</td></tr>';
+                return;
+            }
+            
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                
+                // ID
+                const idCell = document.createElement('td');
+                idCell.textContent = user.id;
+                row.appendChild(idCell);
+                
+                // Benutzername
+                const usernameCell = document.createElement('td');
+                usernameCell.textContent = user.username || '-';
+                row.appendChild(usernameCell);
+                
+                // E-Mail
+                const emailCell = document.createElement('td');
+                emailCell.textContent = user.email || '-';
+                row.appendChild(emailCell);
+                
+                // Vorname
+                const vornameCell = document.createElement('td');
+                vornameCell.textContent = user.vorname || '-';
+                row.appendChild(vornameCell);
+                
+                // Nachname
+                const nachnameCell = document.createElement('td');
+                nachnameCell.textContent = user.nachname || '-';
+                row.appendChild(nachnameCell);
+                
+                // Rolle
+                const roleCell = document.createElement('td');
+                let roleName = 'Unbekannt';
+                
+                // Rolle aus dem Cache ermitteln
+                if (user.rolle && user.rolle.name) {
+                    roleName = user.rolle.name;
+                } else if (user.rolle_id && rolesCache.length > 0) {
+                    const role = rolesCache.find(r => r.id === user.rolle_id);
+                    if (role) {
+                        roleName = role.name;
+                    } else {
+                        roleName = `ID: ${user.rolle_id}`;
+                    }
+                }
+                
+                roleCell.textContent = roleName;
+                row.appendChild(roleCell);
+                
+                // Aktiv
+                const activeCell = document.createElement('td');
+                activeCell.textContent = user.ist_aktiv === true ? 'Ja' : 'Nein';
+                activeCell.style.color = user.ist_aktiv === true ? 'green' : 'red';
+                row.appendChild(activeCell);
+                
+                // Aktionen
+                const actionsCell = document.createElement('td');
+                actionsCell.style.display = 'flex';
+                actionsCell.style.gap = '5px';
+                
+                // Bearbeiten-Button
+                const editButton = document.createElement('button');
+                editButton.innerHTML = '<i class="fas fa-edit"></i>';
+                editButton.title = 'Benutzer bearbeiten';
+                editButton.onclick = () => openEditUserModal(user);
+                actionsCell.appendChild(editButton);
+                
+                // Löschen-Button
+                const deleteButton = document.createElement('button');
+                deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
+                deleteButton.className = 'danger';
+                deleteButton.title = 'Benutzer löschen';
+                deleteButton.onclick = () => deleteUser(user.id, user.username);
+                actionsCell.appendChild(deleteButton);
+                
+                row.appendChild(actionsCell);
+                
+                userList.appendChild(row);
+            });
+        }
+        
+        // Rollenauswahl für Filter befüllen
+        function populateRoleFilterSelect(selectElement, roles) {
+            if (!selectElement) return;
+            
+            // Bestehende Optionen löschen
+            selectElement.innerHTML = '<option value="">Alle Rollen</option>';
+            
+            // Rollen hinzufügen
+            roles.forEach(role => {
+                const option = document.createElement('option');
+                option.value = role.id;
+                option.textContent = role.name;
+                selectElement.appendChild(option);
+            });
+        }
+        
+        // Rollenauswahl für Formular befüllen
+        function populateRoleSelect(selectElement, roles, selectedRoleId = null) {
+            if (!selectElement) return;
+            
+            // Bestehende Optionen löschen
+            selectElement.innerHTML = '';
+            
+            // Rollen hinzufügen
+            roles.forEach(role => {
+                const option = document.createElement('option');
+                option.value = role.id;
+                option.textContent = role.name;
+                
+                // Vorauswahl
+                if (selectedRoleId && role.id === selectedRoleId) {
+                    option.selected = true;
+                }
+                
+                selectElement.appendChild(option);
+            });
+        }
+        
+        // Benutzer filtern
+        function filterUsers() {
+            const roleFilterValue = document.getElementById('roleFilter').value;
+            const searchFilterValue = document.getElementById('searchFilter').value.toLowerCase().trim();
+            
+            log('Filtere Benutzer', { rolle: roleFilterValue, suche: searchFilterValue });
+            
+            if (!Array.isArray(currentUsers) || currentUsers.length === 0) {
+                showMessage('Keine Benutzer zum Filtern vorhanden.', 'info');
+                return;
+            }
+            
+            // Benutzer filtern
+            const filteredUsers = currentUsers.filter(user => {
+                // Rollen-Filter
+                if (roleFilterValue && user.rolle_id !== parseInt(roleFilterValue)) {
+                    return false;
+                }
+                
+                // Such-Filter
+                if (searchFilterValue) {
+                    const username = (user.username || '').toLowerCase();
+                    const email = (user.email || '').toLowerCase();
+                    const vorname = (user.vorname || '').toLowerCase();
+                    const nachname = (user.nachname || '').toLowerCase();
+                    const fullname = `${vorname} ${nachname}`.toLowerCase();
+                    
+                    return username.includes(searchFilterValue) || 
+                           email.includes(searchFilterValue) || 
+                           vorname.includes(searchFilterValue) || 
+                           nachname.includes(searchFilterValue) || 
+                           fullname.includes(searchFilterValue);
+                }
+                
+                return true;
+            });
+            
+            // Gefilterte Benutzer anzeigen
+            populateUserTable(filteredUsers);
+            
+            // Nachricht anzeigen
+            const roleName = roleFilterValue ? (rolesCache.find(r => r.id === parseInt(roleFilterValue))?.name || 'Unbekannte Rolle') : 'Alle Rollen';
+            const searchInfo = searchFilterValue ? `Suche: "${searchFilterValue}"` : '';
+            showMessage(`${filteredUsers.length} von ${currentUsers.length} Benutzern angezeigt. Filter: ${roleName}. ${searchInfo}`, 'info', 3000);
+        }
+        
+        // Filter zurücksetzen
+        function resetFilters() {
+            document.getElementById('roleFilter').value = '';
+            document.getElementById('searchFilter').value = '';
+            
+            // Alle Benutzer anzeigen
+            populateUserTable(currentUsers);
+            
+            showMessage('Filter zurückgesetzt.', 'info', 2000);
+        }
+        
+        // Neuen Benutzer erstellen (Modal öffnen)
+        function openCreateUserModal() {
+            // Formular zurücksetzen
+            document.getElementById('userForm').reset();
+            document.getElementById('userId').value = '';
+            document.getElementById('modalTitle').textContent = 'Neuen Benutzer erstellen';
+            
+            // Passwort-Feld als Pflichtfeld
+            const passwortField = document.getElementById('passwort');
+            passwortField.required = true;
+            passwortField.placeholder = 'Passwort für den neuen Benutzer';
+            
+            // Rollen laden, falls noch nicht geschehen
+            if (rolesCache.length === 0) {
+                fetchRoles().then(() => {
+                    populateRoleSelect(document.getElementById('rolle_id'), rolesCache);
+                });
+            } else {
+                populateRoleSelect(document.getElementById('rolle_id'), rolesCache);
+            }
+            
+            // Aktiv standardmäßig auf true setzen
+            document.getElementById('ist_aktiv').checked = true;
+            
+            // Modal anzeigen
+            document.getElementById('userModal').style.display = 'block';
+            
+            // Fokus auf erstes Feld setzen
+            setTimeout(() => {
+                document.getElementById('username').focus();
+            }, 100);
+            
+            log('Modal zum Erstellen eines neuen Benutzers geöffnet');
+        }
+        
+        // Benutzer bearbeiten (Modal öffnen)
+        function openEditUserModal(user) {
+            // Formular zurücksetzen und mit Benutzerdaten füllen
+            document.getElementById('userForm').reset();
+            document.getElementById('userId').value = user.id;
+            document.getElementById('username').value = user.username || '';
+            document.getElementById('email').value = user.email || '';
+            document.getElementById('vorname').value = user.vorname || '';
+            document.getElementById('nachname').value = user.nachname || '';
+            document.getElementById('modalTitle').textContent = `Benutzer "${user.username}" bearbeiten`;
+            
+            // Passwort-Feld nicht als Pflichtfeld
+            const passwortField = document.getElementById('passwort');
+            passwortField.required = false;
+            passwortField.value = '';
+            passwortField.placeholder = 'Leer lassen, um nicht zu ändern';
+            
+            // Rollen laden, falls noch nicht geschehen
+            if (rolesCache.length === 0) {
+                fetchRoles().then(() => {
+                    populateRoleSelect(document.getElementById('rolle_id'), rolesCache, user.rolle_id);
+                });
+            } else {
+                populateRoleSelect(document.getElementById('rolle_id'), rolesCache, user.rolle_id);
+            }
+            
+            // Aktiv-Status setzen
+            document.getElementById('ist_aktiv').checked = user.ist_aktiv === true;
+            
+            // Modal anzeigen
+            document.getElementById('userModal').style.display = 'block';
+            
+            log('Modal zum Bearbeiten eines Benutzers geöffnet', { id: user.id, username: user.username });
+        }
+        
+        // Modal schließen
+        function closeUserModal() {
+            document.getElementById('userModal').style.display = 'none';
+            log('Benutzermodal geschlossen');
+        }
+        
+        // ============================
+        // EVENT-HANDLER
+        // ============================
+        
+        // Formular-Abschicken-Handler
+        document.getElementById('userForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            const userId = document.getElementById('userId').value;
+            const isNewUser = !userId;
+            
+            logDebug(`Formular wird übermittelt: ${isNewUser ? 'Neuer Benutzer' : 'Benutzer bearbeiten'}`);
+            
+            const submitButton = this.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.textContent;
+            submitButton.textContent = 'Wird gespeichert...';
+            submitButton.disabled = true;
+
+            try {
+                const formData = new FormData(this);
+                const userData = {};
+                
+                formData.forEach((value, key) => {
+                    if (key === 'ist_aktiv') {
+                        userData[key] = document.getElementById('ist_aktiv').checked;
+                    } else if (key === 'rolle_id') {
+                        userData[key] = parseInt(value);
+                    } else if (key === 'passwort' && !value) {
+                        if (!isNewUser) return;
+                        else userData[key] = value;
+                    } else {
+                        userData[key] = value;
+                    }
+                });
+
+                // Validierung der Pflichtfelder
+                if (!userData.username || !userData.email || !userData.rolle_id) {
+                    showMessage('Bitte füllen Sie alle Pflichtfelder aus.', 'warning');
+                    submitButton.disabled = false;
+                    submitButton.textContent = originalButtonText;
+                    return;
+                }
+                
+                // Für neue Benutzer ist ein Passwort erforderlich
+                if (isNewUser && !userData.passwort) {
+                    showMessage('Für neue Benutzer ist ein Passwort erforderlich.', 'warning');
+                    submitButton.disabled = false;
+                    submitButton.textContent = originalButtonText;
+                    return;
+                }
+
+                logDebug('Speichere Benutzerdaten:', {
+                    ...userData,
+                    passwort: userData.passwort ? '***' : undefined
+                });
+
+                let response;
+                if (userId) {
+                    response = await fetchWithAuth(`${API_BASE_URL}/users/${userId}`, {
+                        method: 'PUT',
+                        body: JSON.stringify(userData)
+                    });
+                } else {
+                    response = await fetchWithAuth(`${API_BASE_URL}/users/`, {
+                        method: 'POST',
+                        body: JSON.stringify(userData)
+                    });
+                }
+
+                if (response && response.ok) {
+                    closeUserModal();
+                    await fetchUsers();
+                    showMessage(
+                        userId ? 'Benutzer erfolgreich aktualisiert.' : 'Benutzer erfolgreich erstellt.',
+                        'success'
+                    );
+                } else {
+                    await handleApiError(response, 'Fehler beim Speichern des Benutzers');
+                }
+            } catch (error) {
+                logDebug('Fehler beim Speichern:', error);
+                showMessage(`Fehler: ${error.message}`, 'error');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = originalButtonText;
+            }
+        });
+        
+        // Escape-Taste zum Schließen des Modals
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const modal = document.getElementById('userModal');
+                if (modal && modal.style.display === 'block') {
+                    closeUserModal();
+                }
+            }
+        });
+        
+        // Logout-Funktion
+        function logout() {
+            log('Benutzer wird abgemeldet');
+            
+            // Token und Benutzerdaten entfernen
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('currentUser');
+            
+            // Auch aus sessionStorage löschen
+            sessionStorage.removeItem('accessToken');
+            sessionStorage.removeItem('currentUser');
+            
+            // Cookies löschen
+            document.cookie.split(";").forEach(function(c) {
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+            });
+            
+            // Zur Login-Seite weiterleiten
+            window.location.href = '/Login.html';
+        }
+        
+        // Prüfen, ob der Benutzer Administrator ist
+        async function checkAdminRoleForNav() {
+            try {
+                logDebug('Prüfe Administratorrolle...');
+                
+                const token = localStorage.getItem('accessToken');
+                if (!token) {
+                    logDebug('Kein Token gefunden');
+                    window.location.href = '/Login.html';
+                    return;
+                }
+                
+                const response = await fetch(`${API_BASE_URL}/users/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (response.ok) {
+                    const userData = await response.json();
+                    logDebug('Benutzerdaten empfangen', userData);
+                    
+                    localStorage.setItem('currentUser', JSON.stringify(userData));
+                    
+                    const isAdmin = userData.rolle_id === 1 || (userData.rolle && userData.rolle.name === 'Administrator');
+                    const isManager = userData.rolle_id === 2 || (userData.rolle && userData.rolle.name === 'Manager');
+                    
+                    logDebug('Benutzerrollen', { isAdmin, isManager });
+                    
+                    const adminLinkRoles = document.getElementById('adminLinkRoles');
+                    const adminLinkUsers = document.getElementById('adminLinkUsers');
+                    
+                    if (adminLinkRoles) {
+                        adminLinkRoles.style.display = (isAdmin || isManager) ? 'inline-block' : 'none';
+                    }
+                    
+                    if (adminLinkUsers) {
+                        adminLinkUsers.style.display = isAdmin ? 'inline-block' : 'none';
+                    }
+                    
+                    if (!isAdmin) {
+                        showMessage('Zugriff verweigert. Nur Administratoren können diese Seite sehen.', 'error');
+                        setTimeout(() => {
+                            window.location.href = '/index.html';
+                        }, 2000);
+                    }
+                    
+                    return isAdmin;
+                } else if (response.status === 401 || response.status === 403) {
+                    logDebug('Authentifizierungsfehler', { status: response.status });
+                    localStorage.removeItem('accessToken');
+                    window.location.href = '/Login.html';
+                    return false;
+                } else {
+                    await handleApiError(response, 'Fehler beim Abrufen der Benutzerinformationen');
+                    return false;
+                }
+            } catch (error) {
+                logDebug('Fehler beim Überprüfen der Administratorrolle:', error);
+                showMessage(`Fehler: ${error.message}`, 'error');
+                return false;
+            }
+        }
+        
+        // ============================
+        // SEITENINITIALISIERUNG
+        // ============================
+        
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                log('Seite wird initialisiert...');
+                
+                // Debug-Panel initialisieren
+                const debugPanel = document.getElementById('debug-panel');
+                if (debugPanel) {
+                    debugPanel.style.display = debugMode ? 'block' : 'none';
+                }
+                
+                // Admin-Rolle überprüfen
+                const isAdmin = await checkAdminRoleForNav();
+                
+                if (isAdmin) {
+                    log('Administrator-Zugriff bestätigt, lade Daten...');
+                    
+                    // Daten parallel laden
+                    await Promise.all([
+                        fetchRoles(),
+                        fetchUsers()
+                    ]);
+                    
+                    log('Initialisierung abgeschlossen');
+                }
+            } catch (error) {
+                log('Fehler bei der Initialisierung:', error);
+                showMessage(`Fehler bei der Initialisierung: ${error.message}`, 'error');
+            }
+        });
+    </script>
+    
+    <script src="/static/js/nav.js"></script>
+</body>
+</html>
+

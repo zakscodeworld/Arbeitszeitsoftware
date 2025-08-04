@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Debug Console - BBQ GmbH Zeiterfassung</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <style>
+        body {
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+        }
+        
+        .debug-panel {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .debug-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background-color: #0069d9;
+        }
+        
+        .log-entry {
+            margin-bottom: 10px;
+            padding: 8px;
+            background-color: #fff;
+            border-left: 3px solid #007bff;
+        }
+        
+        .log-entry.error {
+            border-left-color: #dc3545;
+            background-color: #fff8f8;
+        }
+        
+        .log-entry.warning {
+            border-left-color: #ffc107;
+            background-color: #fffdf5;
+        }
+        
+        .log-entry.success {
+            border-left-color: #28a745;
+            background-color: #f8fff8;
+        }
+        
+        .timestamp {
+            font-size: 0.8em;
+            color: #6c757d;
+        }
+        
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 0.9em;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        h2 {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 8px;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            margin-left: 5px;
+        }
+        
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status.warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        /* Token display */
+        .token-display {
+            font-family: monospace;
+            word-break: break-all;
+            padding: 10px;
+            background-color: #eee;
+            border-radius: 4px;
+        }
+        
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        table th, table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        table th {
+            background-color: #f2f2f2;
+        }
+        
+        /* Navigation */
+        .nav-links {
+            margin-bottom: 20px;
+        }
+        
+        .nav-links a {
+            margin-right: 15px;
+            text-decoration: none;
+            color: #007bff;
+        }
+        
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>API Debug Console - BBQ GmbH Zeiterfassung</h1>
+    
+    <div class="nav-links">
+        <a href="/index.html">← Zurück zur Startseite</a>
+        <a href="/admin_benutzer.html">Zur Benutzerverwaltung</a>
+    </div>
+    
+    <div class="section">
+        <h2>API Diagnostics</h2>
+        
+        <div class="debug-controls">
+            <button onclick="testAllEndpoints()">Alle API-Endpoints testen</button>
+            <button onclick="checkAuthentication()">Authentifizierung prüfen</button>
+            <button onclick="fetchUsers()">Benutzer abrufen</button>
+            <button onclick="fetchRoles()">Rollen abrufen</button>
+            <button onclick="clearLogs()">Logs löschen</button>
+        </div>
+        
+        <div class="debug-panel" id="logPanel">
+            <div class="log-entry">API Debug Console bereit. Wählen Sie einen Test aus.</div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>Authentication Status</h2>
+        <div id="authStatus">Prüfe Authentifizierungsstatus...</div>
+        
+        <div id="tokenInfo" style="margin-top: 15px; display: none;">
+            <h3>Token Information</h3>
+            <div id="tokenDetails"></div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>API Endpoints Status</h2>
+        <table id="endpointStatus">
+            <thead>
+                <tr>
+                    <th>Endpoint</th>
+                    <th>Method</th>
+                    <th>Status</th>
+                    <th>Response Time</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>/api/v1/users/me</td>
+                    <td>GET</td>
+                    <td><span class="status" id="status-users-me">Not Tested</span></td>
+                    <td id="time-users-me">-</td>
+                    <td id="details-users-me">-</td>
+                </tr>
+                <tr>
+                    <td>/api/v1/users/</td>
+                    <td>GET</td>
+                    <td><span class="status" id="status-users-list">Not Tested</span></td>
+                    <td id="time-users-list">-</td>
+                    <td id="details-users-list">-</td>
+                </tr>
+                <tr>
+                    <td>/api/v1/roles/</td>
+                    <td>GET</td>
+                    <td><span class="status" id="status-roles-list">Not Tested</span></td>
+                    <td id="time-roles-list">-</td>
+                    <td id="details-roles-list">-</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="section">
+        <h2>User Data Preview</h2>
+        <button onclick="refreshUserDataPreview()">Aktualisieren</button>
+        <div id="userDataPreview" style="margin-top: 15px;">
+            <p>Keine Benutzerdaten geladen</p>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>Role Data Preview</h2>
+        <button onclick="refreshRoleDataPreview()">Aktualisieren</button>
+        <div id="roleDataPreview" style="margin-top: 15px;">
+            <p>Keine Rollendaten geladen</p>
+        </div>
+    </div>
+    
+    <script>
+        // API-Basis-URL
+        const API_BASE_URL = '/api/v1';
+        
+        // Speichere Daten
+        let userData = null;
+        let roleData = null;
+        
+        // Log-Funktionen
+        function log(message, type = 'info') {
+            const logPanel = document.getElementById('logPanel');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            
+            const timestampSpan = document.createElement('span');
+            timestampSpan.className = 'timestamp';
+            timestampSpan.textContent = `[${timestamp}] `;
+            
+            logEntry.appendChild(timestampSpan);
+            logEntry.appendChild(document.createTextNode(message));
+            
+            logPanel.appendChild(logEntry);
+            logPanel.scrollTop = logPanel.scrollHeight;
+        }
+        
+        function logObject(message, obj, type = 'info') {
+            log(message, type);
+            
+            if (obj) {
+                const logPanel = document.getElementById('logPanel');
+                const pre = document.createElement('pre');
+                pre.textContent = JSON.stringify(obj, null, 2);
+                
+                const logEntry = document.createElement('div');
+                logEntry.className = `log-entry ${type}`;
+                logEntry.appendChild(pre);
+                
+                logPanel.appendChild(logEntry);
+                logPanel.scrollTop = logPanel.scrollHeight;
+            }
+        }
+        
+        function clearLogs() {
+            document.getElementById('logPanel').innerHTML = 
+                '<div class="log-entry">Logs wurden gelöscht.</div>';
+        }
+        
+        // Auth-Funktionen
+        function getAuthToken() {
+            return localStorage.getItem('accessToken');
+        }
+        
+        function checkAuthentication() {
+            const token = getAuthToken();
+            const authStatusElement = document.getElementById('authStatus');
+            const tokenInfoElement = document.getElementById('tokenInfo');
+            const tokenDetailsElement = document.getElementById('tokenDetails');
+            
+            if (!token) {
+                authStatusElement.innerHTML = `
+                    <div class="status error">Nicht authentifiziert</div>
+                    <p>Kein Token gefunden. Bitte melden Sie sich an.</p>
+                    <button onclick="redirectToLogin()">Zur Anmeldeseite</button>
+                `;
+                tokenInfoElement.style.display = 'none';
+                log('Kein Authentifizierungstoken gefunden.', 'error');
+                return false;
+            }
+            
+            // Versuche, Token zu dekodieren
+            try {
+                const parts = token.split('.');
+                if (parts.length !== 3) {
+                    throw new Error('Ungültiges Token-Format');
+                }
+                
+                const header = JSON.parse(atob(parts[0]));
+                const payload = JSON.parse(atob(parts[1]));
+                
+                const now = Math.floor(Date.now() / 1000);
+                const isExpired = payload.exp && payload.exp < now;
+                
+                if (isExpired) {
+                    authStatusElement.innerHTML = `
+                        <div class="status error">Token abgelaufen</div>
+                        <p>Ihr Token ist am ${new Date(payload.exp * 1000).toLocaleString()} abgelaufen.</p>
+                        <button onclick="redirectToLogin()">Zur Anmeldeseite</button>
+                    `;
+                    log('Token ist abgelaufen.', 'error');
+                } else {
+                    const expiresIn = payload.exp ? Math.floor((payload.exp - now) / 60) : 'unbekannt';
+                    
+                    authStatusElement.innerHTML = `
+                        <div class="status success">Authentifiziert</div>
+                        <p>Token gültig für weitere ${expiresIn} Minuten.</p>
+                    `;
+                    log('Token ist gültig.', 'success');
+                }
+                
+                // Token-Details anzeigen
+                tokenInfoElement.style.display = 'block';
+                
+                const tokenHTML = `
+                    <p><strong>Algorithmus:</strong> ${header.alg}</p>
+                    <p><strong>Typ:</strong> ${header.typ}</p>
+                    <p><strong>Subject:</strong> ${payload.sub || 'N/A'}</p>
+                    <p><strong>Ausgestellt am:</strong> ${payload.iat ? new Date(payload.iat * 1000).toLocaleString() : 'N/A'}</p>
+                    <p><strong>Läuft ab am:</strong> ${payload.exp ? new Date(payload.exp * 1000).toLocaleString() : 'N/A'}</p>
+                    <div class="token-display">${token}</div>
+                `;
+                
+                tokenDetailsElement.innerHTML = tokenHTML;
+                
+                // Log Token-Details
+                logObject('Token dekodiert', {
+                    header,
+                    payload: {
+                        ...payload,
+                        exp_date: payload.exp ? new Date(payload.exp * 1000).toLocaleString() : 'N/A',
+                        iat_date: payload.iat ? new Date(payload.iat * 1000).toLocaleString() : 'N/A'
+                    }
+                });
+                
+                return !isExpired;
+            } catch (error) {
+                authStatusElement.innerHTML = `
+                    <div class="status error">Ungültiges Token</div>
+                    <p>Das Token konnte nicht dekodiert werden: ${error.message}</p>
+                    <button onclick="redirectToLogin()">Zur Anmeldeseite</button>
+                `;
+                tokenInfoElement.style.display = 'none';
+                log(`Token-Dekodierfehler: ${error.message}`, 'error');
+                return false;
+            }
+        }
+        
+        function redirectToLogin() {
+            window.location.href = '/Login.html';
+        }
+        
+        // API-Test-Funktionen
+        async function testEndpoint(endpoint, statusId, timeId, detailsId) {
+            const token = getAuthToken();
+            
+            if (!token) {
+                log(`Kann ${endpoint} nicht testen: Kein Token verfügbar`, 'error');
+                updateEndpointStatus(statusId, 'error', 'Nicht authentifiziert');
+                return null;
+            }
+            
+            const url = `${API_BASE_URL}${endpoint}`;
+            const statusElement = document.getElementById(statusId);
+            const timeElement = document.getElementById(timeId);
+            const detailsElement = document.getElementById(detailsId);
+            
+            log(`Teste Endpoint: ${url}`);
+            
+            try {
+                const startTime = performance.now();
+                
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                const endTime = performance.now();
+                const responseTime = Math.round(endTime - startTime);
+                timeElement.textContent = `${responseTime} ms`;
+                
+                if (response.ok) {
+                    updateEndpointStatus(statusId, 'success', `${response.status} ${response.statusText}`);
+                    
+                    try {
+                        const data = await response.json();
+                        
+                        if (Array.isArray(data)) {
+                            detailsElement.textContent = `${data.length} Einträge gefunden`;
+                        } else {
+                            detailsElement.textContent = 'Daten erfolgreich abgerufen';
+                        }
+                        
+                        log(`Antwort von ${endpoint}: Statuscode ${response.status}`, 'success');
+                        return data;
+                    } catch (jsonError) {
+                        detailsElement.textContent = `JSON-Parsing-Fehler: ${jsonError.message}`;
+                        log(`JSON-Parsing-Fehler: ${jsonError.message}`, 'error');
+                        return null;
+                    }
+                } else {
+                    updateEndpointStatus(statusId, 'error', `${response.status} ${response.statusText}`);
+                    
+                    try {
+                        const errorData = await response.json();
+                        detailsElement.textContent = errorData.detail || 'Unbekannter Fehler';
+                        logObject(`Fehler bei ${endpoint}: ${response.status} ${response.statusText}`, errorData, 'error');
+                    } catch (e) {
+                        detailsElement.textContent = `Fehler: ${response.statusText}`;
+                        log(`Fehler bei ${endpoint}: ${response.status} ${response.statusText}`, 'error');
+                    }
+                    
+                    return null;
+                }
+            } catch (error) {
+                updateEndpointStatus(statusId, 'error', 'Netzwerkfehler');
+                timeElement.textContent = '-';
+                detailsElement.textContent = error.message;
+                log(`Netzwerkfehler bei ${endpoint}: ${error.message}`, 'error');
+                return null;
+            }
+        }
+        
+        function updateEndpointStatus(id, type, text) {
+            const element = document.getElementById(id);
+            element.className = `status ${type}`;
+            element.textContent = text;
+        }
+        
+        async function testAllEndpoints() {
+            log('Starte Test aller API-Endpoints...', 'info');
+            
+            // Test /users/me endpoint
+            userData = await testEndpoint('/users/me', 'status-users-me', 'time-users-me', 'details-users-me');
+            
+            if (userData) {
+                refreshUserDataPreview();
+                
+                // Wenn erfolgreich und Admin, teste die anderen Endpoints
+                const isAdmin = userData.rolle_id === 1 || 
+                               (userData.rolle && userData.rolle.name === 'Administrator');
+                
+                if (isAdmin) {
+                    // Test /users/ endpoint
+                    const users = await testEndpoint('/users/', 'status-users-list', 'time-users-list', 'details-users-list');
+                    
+                    // Test /roles/ endpoint
+                    roleData = await testEndpoint('/roles/', 'status-roles-list', 'time-roles-list', 'details-roles-list');
+                    
+                    if (roleData) {
+                        refreshRoleDataPreview();
+                    }
+                } else {
+                    log('Benutzer ist kein Administrator, überspringe Admin-Endpoints.', 'warning');
+                    updateEndpointStatus('status-users-list', 'warning', 'Keine Berechtigung');
+                    updateEndpointStatus('status-roles-list', 'warning', 'Keine Berechtigung');
+                }
+            }
+            
+            log('API-Tests abgeschlossen.', 'info');
+        }
+        
+        // Daten-Abruf-Funktionen
+        async function fetchUsers() {
+            log('Lade Benutzer von der API...');
+            
+            const token = getAuthToken();
+            if (!token) {
+                log('Keine Authentifizierung für Benutzerabruf', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/users/`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const users = await response.json();
+                    logObject(`${users.length} Benutzer erfolgreich geladen`, users, 'success');
+                    
+                    // Aktualisiere Vorschau
+                    userData = users;
+                    refreshUserDataPreview();
+                } else {
+                    if (response.status === 401 || response.status === 403) {
+                        log('Keine Berechtigung zum Abrufen der Benutzer', 'error');
+                    } else {
+                        try {
+                            const errorData = await response.json();
+                            logObject(`Fehler beim Laden der Benutzer: ${response.status} ${response.statusText}`, errorData, 'error');
+                        } catch (e) {
+                            log(`Fehler beim Laden der Benutzer: ${response.status} ${response.statusText}`, 'error');
+                        }
+                    }
+                }
+            } catch (error) {
+                log(`Netzwerkfehler beim Laden der Benutzer: ${error.message}`, 'error');
+            }
+        }
+        
+        async function fetchRoles() {
+            log('Lade Rollen von der API...');
+            
+            const token = getAuthToken();
+            if (!token) {
+                log('Keine Authentifizierung für Rollenabruf', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/roles/`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const roles = await response.json();
+                    logObject(`${roles.length} Rollen erfolgreich geladen`, roles, 'success');
+                    
+                    // Aktualisiere Vorschau
+                    roleData = roles;
+                    refreshRoleDataPreview();
+                } else {
+                    if (response.status === 401 || response.status === 403) {
+                        log('Keine Berechtigung zum Abrufen der Rollen', 'error');
+                    } else {
+                        try {
+                            const errorData = await response.json();
+                            logObject(`Fehler beim Laden der Rollen: ${response.status} ${response.statusText}`, errorData, 'error');
+                        } catch (e) {
+                            log(`Fehler beim Laden der Rollen: ${response.status} ${response.statusText}`, 'error');
+                        }
+                    }
+                }
+            } catch (error) {
+                log(`Netzwerkfehler beim Laden der Rollen: ${error.message}`, 'error');
+            }
+        }
+        
+        function refreshUserDataPreview() {
+            const previewElement = document.getElementById('userDataPreview');
+            
+            if (userData) {
+                if (Array.isArray(userData)) {
+                    previewElement.innerHTML = `
+                        <p>Gefundene Benutzer: ${userData.length}</p>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Benutzername</th>
+                                    <th>E-Mail</th>
+                                    <th>Name</th>
+                                    <th>Rolle</th>
+                                    <th>Aktiv</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${userData.map(user => `
+                                    <tr>
+                                        <td>${user.id || 'N/A'}</td>
+                                        <td>${user.username || 'N/A'}</td>
+                                        <td>${user.email || 'N/A'}</td>
+                                        <td>${(user.vorname || '') + ' ' + (user.nachname || '')}</td>
+                                        <td>${user.rolle?.name || `Rolle ID: ${user.rolle_id}` || 'N/A'}</td>
+                                        <td>${user.ist_aktiv ? 'Ja' : 'Nein'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                } else {
+                    previewElement.innerHTML = `
+                        <p>Benutzerdaten:</p>
+                        <pre>${JSON.stringify(userData, null, 2)}</pre>
+                    `;
+                }
+            } else {
+                previewElement.innerHTML = '<p>Keine Benutzerdaten geladen</p>';
+            }
+        }
+        
+        function refreshRoleDataPreview() {
+            const previewElement = document.getElementById('roleDataPreview');
+            
+            if (roleData) {
+                if (Array.isArray(roleData)) {
+                    previewElement.innerHTML = `
+                        <p>Gefundene Rollen: ${roleData.length}</p>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Beschreibung</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${roleData.map(role => `
+                                    <tr>
+                                        <td>${role.id || 'N/A'}</td>
+                                        <td>${role.name || 'N/A'}</td>
+                                        <td>${role.beschreibung || '-'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `;
+                } else {
+                    previewElement.innerHTML = `
+                        <p>Rollendaten:</p>
+                        <pre>${JSON.stringify(roleData, null, 2)}</pre>
+                    `;
+                }
+            } else {
+                previewElement.innerHTML = '<p>Keine Rollendaten geladen</p>';
+            }
+        }
+        
+        // Initialisierung
+        document.addEventListener('DOMContentLoaded', () => {
+            log('API Debug Console gestartet');
+            checkAuthentication();
+        });
+    </script>
+</body>
+</html>

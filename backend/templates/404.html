@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seite nicht gefunden - BBQ GmbH Zeiterfassung</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/nav-styles.css">
+    <link rel="stylesheet" href="/static/footer-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="/static/images/BBQGmbH.png" type="image/png">
+    <script src="/static/js/nav.js" defer></script>
+    <style>
+        .error-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 60vh;
+            padding: 3rem;
+            background: linear-gradient(135deg, #ffffff, #f5f8fd);
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        .error-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #004a99, #0077cc, #004a99);
+            background-size: 200% 100%;
+            animation: gradientMove 3s linear infinite;
+        }
+        
+        .error-code {
+            font-size: 12rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #004a99, #0077cc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .error-code::after {
+            content: '404';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%) scale(1.2);
+            opacity: 0.1;
+            filter: blur(8px);
+            z-index: -1;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .error-message {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .error-details {
+            margin-bottom: 2rem;
+            color: #555;
+            max-width: 600px;
+            line-height: 1.8;
+            font-size: 1.2rem;
+        }
+        
+        .error-icon {
+            font-size: 6rem;
+            color: #004a99;
+            margin-bottom: 2rem;
+            filter: drop-shadow(0 4px 8px rgba(0, 74, 153, 0.2));
+            animation: swing 2s ease-in-out infinite;
+            transform-origin: center;
+        }
+        
+        .notice-box {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: 0 4px 15px rgba(0, 74, 153, 0.1);
+            transform: scale(0.95);
+            transition: all 0.3s ease;
+        }
+
+        .notice-box:hover {
+            transform: scale(1);
+            box-shadow: 0 8px 25px rgba(0, 74, 153, 0.15);
+        }
+
+        .notice-box h3 {
+            color: #004a99;
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+        }
+
+        .feature-hint {
+            color: #666;
+            font-style: italic;
+            margin-top: 0.5rem;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2.5rem;
+            background: linear-gradient(45deg, #004a99, #0077cc);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            margin-top: 2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 74, 153, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .back-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shine 2s infinite;
+        }
+        
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 74, 153, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .error-code {
+                font-size: 8rem;
+            }
+            .error-message {
+                font-size: 2rem;
+            }
+            .error-icon {
+                font-size: 5rem;
+            }
+            .error-container {
+                padding: 2rem;
+                margin: 1rem;
+            }
+        }
+
+        .error-emoji {
+            font-size: 2.5rem;
+            display: inline-block;
+            filter: drop-shadow(0 2px 4px rgba(0, 74, 153, 0.2));
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        @keyframes swing {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+
+        @keyframes gradientMove {
+            0% { background-position: 0% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1.2); }
+            50% { transform: translate(-50%, -50%) scale(1.4); }
+        }
+
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e1ecf7;
+            border-radius: 2px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+
+        .progress-bar::after {
+            content: '';
+            display: block;
+            width: 30%;
+            height: 100%;
+            background: linear-gradient(90deg, #004a99, #0077cc);
+            animation: progress 2s ease-in-out infinite;
+        }
+
+        @keyframes progress {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(400%); }
+        }
+
+        @keyframes slideUp {
+            0% {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <button id="menu-toggle" class="menu-toggle" aria-label="Toggle menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="logo-container">
+            <img src="/static/images/BBQGmbH.png" alt="BBQ GmbH Logo">
+            <h1>BBQ GmbH Zeiterfassung</h1>
+        </div>
+        <nav class="main-nav">
+            <ul>
+                <li><a href="/index.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="/arbeitszeiten.html"><i class="fas fa-clock"></i> Arbeitszeiten</a></li>
+                <li><a href="/urlaub.html"><i class="fas fa-calendar-alt"></i> Urlaub/Abwesenheiten</a></li>
+                <li><a href="/urlaube/genehmigen" id="adminLinkApprovals"><i class="fas fa-check-circle"></i> Urlaubsgenehmigungen</a></li>
+                <li><a href="/rollen.html" id="adminLinkRoles" class="active"><i class="fas fa-user-shield"></i> Rollenverwaltung</a></li>
+                <li><a href="/admin_benutzer.html" id="adminLinkUsers"><i class="fas fa-users-cog"></i> Benutzerverwaltung</a></li>
+                <li><a href="/info.html"><i class="fas fa-info-circle"></i> Info</a></li>
+                <li><a href="/hilfe.html"><i class="fas fa-question-circle"></i> Hilfe</a></li>
+                <li><a href="/passwort.html"><i class="fas fa-key"></i> Passwort ändern</a></li>
+                <li><button class="logout-button" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="error-container">
+            <div class="error-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="error-code">404</div>
+            <div class="error-message">Oops! Seite nicht gefunden</div>
+            <div class="error-details" id="errorDetails">
+                Die von Ihnen gesuchte Seite existiert nicht oder wurde verschoben. Bitte überprüfen Sie die URL oder kehren Sie zur Startseite zurück.
+            </div>
+            
+            <div class="dev-message">
+                <span class="dev-emoji">👩‍💻</span>
+                <span>Unsere Entwickler arbeiten fleißig an neuen Features!</span>
+                <span class="dev-emoji">👨‍💻</span>
+            </div>
+            
+            <div id="socialMediaNotice" class="notice-box" style="display: none;">
+                <h3>Social Media Links</h3>
+                <p>Da es sich um ein Universitätsprojekt handelt, sind die Social Media Profile der BBQ GmbH hier nicht verfügbar. <span class="error-emoji">📚</span></p>
+                <p class="feature-hint">Unsere Entwickler arbeiten bereits an der Integration! <span class="error-emoji">💻</span></p>
+                <div class="progress-bar"></div>
+            </div>
+            
+            <div id="featureDevNotice" class="notice-box" style="display: none;">
+                <h3>Feature in Entwicklung</h3>
+                <p>Diese Funktion befindet sich gerade in der Entwicklung. <span class="error-emoji">⚙️</span></p>
+                <p class="feature-hint">Wir geben unser Bestes, um diese Funktion bald verfügbar zu machen! <span class="error-emoji">💪</span></p>
+                <div class="progress-bar"></div>
+            </div>
+            
+            <a href="/index.html" class="back-button">
+                <i class="fas fa-home"></i>
+                Zurück zur Startseite
+            </a>
+        </div>
+    </div>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Über uns</h3>
+                <p>BBQ GmbH ist ein führender Anbieter von Bildungs- und Beratungslösungen für Unternehmen und Institutionen.</p>
+                <div class="social-links">
+                    <a href="#" class="social-link" data-platform="linkedin" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="social-link" data-platform="twitter" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-link" data-platform="facebook" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-link" data-platform="instagram" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3>Kontakt</h3>
+                <p><i class="fas fa-map-marker-alt"></i> Digitalstraße 42, 10115 Berlin</p>
+                <p><i class="fas fa-phone"></i> +49 30 12345678</p>
+                <p><i class="fas fa-envelope"></i> info@bbqgmbh-projekt.de</p>
+            </div>
+            <div class="footer-section">
+                <h3>Links</h3>
+                <ul>
+                    <li><a href="/info.html">Über uns</a></li>
+                    <li><a href="/hilfe.html">Hilfe & Support</a></li>
+                    <li><a href="/datenschutz.html">Datenschutz</a></li>
+                    <li><a href="/impressum.html">Impressum</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright-bar">
+            <p>&copy; 2025 BBQ GmbH Zeiterfassungssystem. Alle Rechte vorbehalten.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const feature = urlParams.get('feature');
+            
+            // Show appropriate notice based on feature parameter
+            if (feature === 'social') {
+                document.getElementById('socialMediaNotice').style.display = 'block';
+            } else if (feature === 'development') {
+                document.getElementById('featureDevNotice').style.display = 'block';
+            }
+            
+            // Handle social media links in footer
+            document.querySelectorAll('.social-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const platform = this.getAttribute('data-platform');
+                    const newUrl = `/404.html?feature=social&platform=${platform}`;
+                    window.history.pushState({}, '', newUrl);
+                    document.getElementById('socialMediaNotice').style.display = 'block';
+                    document.getElementById('socialMediaNotice').scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        });
+
+        // Logout function
+        function logout() {
+            localStorage.clear();
+            sessionStorage.clear();
+            document.cookie.split(";").forEach(function(c) {
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+            });
+            window.location.href = '/Login.html';
+        }
+    </script>
+</body>
+</html>

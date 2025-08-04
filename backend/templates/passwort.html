@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Passwort ändern - BBQ GmbH Zeiterfassung</title>    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/nav-styles.css">
+    <link rel="stylesheet" href="/static/footer-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="/static/images/BBQGmbH.png" type="image/png">
+    <script src="/static/js/nav.js" defer></script>
+    <style>
+        .password-requirements {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        .password-requirements ul {
+            margin: 0.5rem 0 0 1.5rem;
+            padding: 0;
+        }
+
+        .password-requirements li {
+            margin-bottom: 0.3rem;
+            color: #555;
+        }
+
+        .message-area {
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .message-area.error {
+            background-color: #ffe6e6;
+            color: #dc3545;
+            border: 1px solid #dc3545;
+        }
+
+        .message-area.success {
+            background-color: #e6ffe6;
+            color: #28a745;
+            border: 1px solid #28a745;
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <button id="menu-toggle" class="menu-toggle" aria-label="Toggle menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="logo-container">
+            <img src="/static/images/BBQGmbH.png" alt="BBQ GmbH Logo">
+            <h1>BBQ GmbH Zeiterfassung</h1>
+        </div>
+        <nav class="main-nav">
+            <ul>
+                <li><a href="/index.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="/arbeitszeiten.html"><i class="fas fa-clock"></i> Arbeitszeiten</a></li>
+                <li><a href="/urlaub.html"><i class="fas fa-calendar-alt"></i> Urlaub/Abwesenheiten</a></li>
+                <li><a href="/urlaube/genehmigen" id="adminLinkApprovals"><i class="fas fa-check-circle"></i> Urlaubsgenehmigungen</a></li>
+                <li><a href="/rollen.html" id="adminLinkRoles" class="active"><i class="fas fa-user-shield"></i> Rollenverwaltung</a></li>
+                <li><a href="/admin_benutzer.html" id="adminLinkUsers"><i class="fas fa-users-cog"></i> Benutzerverwaltung</a></li>
+                <li><a href="/info.html"><i class="fas fa-info-circle"></i> Info</a></li>
+                <li><a href="/hilfe.html"><i class="fas fa-question-circle"></i> Hilfe</a></li>
+                <li><a href="/passwort.html"><i class="fas fa-key"></i> Passwort ändern</a></li>
+                <li><button class="logout-button" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Passwort ändern</h1>
+        </div>
+        
+        <div class="card">
+            <h2>Passwort-Einstellungen</h2>                <div class="card-content">
+                <p>Geben Sie Ihr aktuelles Passwort und dann ein neues Passwort ein.</p>
+                <p class="password-requirements">
+                    Das neue Passwort muss folgende Anforderungen erfüllen:
+                    <ul>
+                        <li>Mindestens 12 Zeichen lang</li>
+                        <li>Mindestens ein Großbuchstabe</li>
+                        <li>Mindestens ein Kleinbuchstabe</li>
+                        <li>Mindestens eine Zahl</li>
+                        <li>Mindestens ein Sonderzeichen (!@#$%^&*(),.?":{}|<>)</li>
+                        <li>Darf nicht mit dem aktuellen Passwort übereinstimmen</li>
+                    </ul>
+                </p>
+                
+                <div id="message-area" class="message-area" style="display:none;"></div>
+
+                <form id="changePasswordForm">
+                    <label for="aktuelles_passwort">Aktuelles Passwort:</label>
+                    <input type="password" id="aktuelles_passwort" name="aktuelles_passwort" placeholder="Aktuelles Passwort eingeben" required>
+                    
+                    <label for="neues_passwort">Neues Passwort:</label>
+                    <input type="password" id="neues_passwort" name="neues_passwort" placeholder="Neues Passwort (min. 12 Zeichen)" minlength="12" required>
+                    
+                    <label for="neues_passwort_confirm">Neues Passwort bestätigen:</label>
+                    <input type="password" id="neues_passwort_confirm" name="neues_passwort_confirm" placeholder="Neues Passwort bestätigen" minlength="12" required>
+                    
+                    <button type="submit" class="button">Passwort ändern</button>
+                </form>
+            </div>
+        </div>
+    </div>    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Über uns</h3>
+                <p>BBQ GmbH ist ein führender Anbieter von Bildungs- und Beratungslösungen für Unternehmen und Institutionen.</p>
+                <div class="social-links">
+                    <a href="/404.html?feature=social" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="/404.html?feature=social" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="/404.html?feature=social" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="/404.html?feature=social" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+              <div class="footer-section">
+                <h3>Kontakt</h3>
+                <p><i class="fas fa-map-marker-alt"></i> Digitalstraße 42, 10115 Berlin</p>
+                <p><i class="fas fa-phone"></i> +49 30 12345678</p>
+                <p><i class="fas fa-envelope"></i> info@bbqgmbh-projekt.de</p>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Links</h3>                <ul>
+                    <li><a href="/info.html">Über uns</a></li>
+                    <li><a href="/hilfe.html">Hilfe & Support</a></li>
+                    <li><a href="/datenschutz.html">Datenschutz</a></li>
+                    <li><a href="/impressum.html">Impressum</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="copyright-bar">
+            <p>&copy; 2025 BBQ GmbH Zeiterfassungssystem. Alle Rechte vorbehalten.</p>
+        </div>
+    </footer>    <script>        // Logout function
+        window.logout = function() {
+            // Clear localStorage
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('currentUser');
+            
+            // Clear sessionStorage
+            sessionStorage.removeItem('accessToken');
+            sessionStorage.removeItem('currentUser');
+            
+            // Clear cookies (set them to expire)
+            document.cookie.split(";").forEach(function(c) {
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+            });
+            
+            // Redirect to Login page with capital L
+            window.location.href = '/Login.html';
+        }
+
+        // Check admin role for navigation
+        function checkAdminRoleForNav() {
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            fetch('/auth/users/me', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Nicht authentifiziert');
+                return response.json();
+            })            .then(userData => {
+                // If user has admin role or manager role, show admin links
+                if (userData.role_id === 1 || userData.role_id === 2) { // 1=Admin, 2=Manager
+                    document.getElementById('adminLinkRoles').style.display = 'inline-block';
+                    
+                    // Only show user management to Administrators
+                    if (userData.role_id === 1) {
+                        document.getElementById('adminLinkUsers').style.display = 'inline-block';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error checking admin role:', error);
+                window.location.href = '/login.html';
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            checkAdminRoleForNav();
+            
+            const changePasswordForm = document.getElementById('changePasswordForm');
+            const messageArea = document.getElementById('message-area');
+            
+            changePasswordForm.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                const currentPassword = document.getElementById('aktuelles_passwort').value;
+                const newPassword = document.getElementById('neues_passwort').value;
+                const confirmPassword = document.getElementById('neues_passwort_confirm').value;
+                
+                try {
+                    // Reset message area
+                    messageArea.style.display = 'none';
+                    messageArea.textContent = '';
+                    messageArea.classList.remove('success', 'error');
+
+                    if (newPassword === currentPassword) {
+                        messageArea.textContent = 'Das neue Passwort darf nicht mit dem aktuellen Passwort übereinstimmen.';
+                        messageArea.classList.add('error');
+                        messageArea.style.display = 'block';
+                        return;
+                    }
+
+                    if (newPassword !== confirmPassword) {
+                        messageArea.textContent = 'Die Passwörter stimmen nicht überein.';
+                        messageArea.classList.add('error');
+                        messageArea.style.display = 'block';
+                        return;
+                    }
+
+                    if (newPassword.length < 12) {
+                        messageArea.textContent = 'Das Passwort muss mindestens 12 Zeichen lang sein.';
+                        messageArea.classList.add('error');
+                        messageArea.style.display = 'block';
+                        return;
+                    }
+
+                    // Zusätzliche Passwortvalidierung
+                    const hasUpperCase = /[A-Z]/.test(newPassword);
+                    const hasLowerCase = /[a-z]/.test(newPassword);
+                    const hasNumbers = /\d/.test(newPassword);
+                    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(newPassword);
+
+                    if (!hasUpperCase || !hasLowerCase || !hasNumbers || !hasSpecialChar) {
+                        messageArea.textContent = 'Das Passwort muss mindestens einen Großbuchstaben, einen Kleinbuchstaben, eine Zahl und ein Sonderzeichen enthalten.';
+                        messageArea.classList.add('error');
+                        messageArea.style.display = 'block';
+                        return;
+                    }
+
+                    // 1. Verify current password
+                    const verifyResponse = await fetch('/auth/verify-password', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ password: currentPassword })
+                    });
+
+                    if (!verifyResponse.ok) {
+                        messageArea.textContent = 'Das aktuelle Passwort ist nicht korrekt.';
+                        messageArea.classList.add('error');
+                        messageArea.style.display = 'block';
+                        return;
+                    }                    // 2. Get current user's ID
+                    const userMeResponse = await fetch('/auth/users/me', {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+
+                    if (!userMeResponse.ok) {
+                        const errorData = await userMeResponse.json();
+                        messageArea.textContent = errorData.detail || 'Fehler beim Abrufen der Benutzerinformationen.';
+                        messageArea.classList.add('error');
+                        messageArea.style.display = 'block';
+                        if (userMeResponse.status === 401) {
+                            logout();
+                        }
+                        return;                    }
+                      const userData = await userMeResponse.json();
+                    const userId = userData.id;
+                      // 3. Update password with full API path
+                    const response = await fetch(`/api/v1/users/${userId}/password`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ 
+                            current_password: currentPassword,
+                            new_password: newPassword 
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        messageArea.textContent = 'Passwort erfolgreich geändert!';
+                        messageArea.classList.add('success');
+                        messageArea.style.display = 'block';
+                        document.getElementById('aktuelles_passwort').value = '';
+                        document.getElementById('neues_passwort').value = '';
+                        document.getElementById('neues_passwort_confirm').value = '';
+                    } else {
+                        messageArea.textContent = data.detail || 'Passwortänderung fehlgeschlagen.';
+                        messageArea.classList.add('error');
+                        messageArea.style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error('Password change error:', error);
+                    messageArea.textContent = 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
+                    messageArea.classList.add('error');
+                    messageArea.style.display = 'block';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

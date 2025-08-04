@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hilfe - BBQ GmbH Zeiterfassung</title>    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/nav-styles.css">
+    <link rel="stylesheet" href="/static/footer-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="/static/images/BBQGmbH.png" type="image/png">
+    <script src="/static/js/nav.js" defer></script>
+    <style>
+        .faq-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        .faq-list li {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+        
+        .faq-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .faq-list strong {
+            color: #004a99;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        
+        .contact-info {
+            background-color: #f5f9ff;
+            border-left: 4px solid #005cb3;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .contact-info p {
+            margin: 5px 0;
+        }
+        
+        .help-category {
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <button id="menu-toggle" class="menu-toggle" aria-label="Toggle menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="logo-container">
+            <img src="/static/images/BBQGmbH.png" alt="BBQ GmbH Logo">
+            <h1>BBQ GmbH Zeiterfassung</h1>
+        </div>
+        <nav class="main-nav">
+            <ul>
+                <li><a href="/index.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="/arbeitszeiten.html"><i class="fas fa-clock"></i> Arbeitszeiten</a></li>
+                <li><a href="/urlaub.html"><i class="fas fa-calendar-alt"></i> Urlaub/Abwesenheiten</a></li>
+                <li><a href="/urlaube/genehmigen" id="adminLinkApprovals" style="display:none;"><i class="fas fa-check-circle"></i> Urlaubsgenehmigungen</a></li>
+                <li><a href="/rollen.html" id="adminLinkRoles" style="display:none;"><i class="fas fa-user-shield"></i> Rollenverwaltung</a></li>
+                <li><a href="/admin_benutzer.html" id="adminLinkUsers" style="display:none;"><i class="fas fa-users-cog"></i> Benutzerverwaltung</a></li>
+                <li><a href="/info.html"><i class="fas fa-info-circle"></i> Info</a></li>
+                <li><a href="/hilfe.html"><i class="fas fa-question-circle"></i> Hilfe</a></li>
+                <li><a href="/passwort.html"><i class="fas fa-key"></i> Passwort ändern</a></li>
+                <li><button class="logout-button" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Hilfe & Unterstützung</h1>
+        </div>
+        
+        <div class="card">
+            <h2>Hilfe-Center</h2>
+            <div class="card-content">
+                <p>Hier finden Sie Antworten auf häufig gestellte Fragen und Kontaktmöglichkeiten für die Zeiterfassungsanwendung.</p>
+
+                <div class="help-category">
+                    <h3>Häufig gestellte Fragen (FAQ)</h3>
+                    <ul class="faq-list">
+                        <li>
+                            <strong>Wie erfasse ich meine Arbeitszeiten?</strong>
+                            <p>Gehen Sie zur Seite "Arbeitszeiten" und klicken Sie auf "Neue Zeit erfassen". Wählen Sie das Projekt, die Aufgabe, das Datum und tragen Sie die geleisteten Stunden ein. Ein Kommentar ist optional, aber für die Nachvollziehbarkeit empfohlen.</p>
+                        </li>
+                        <li>
+                            <strong>Wie beantrage ich Urlaub oder andere Abwesenheiten?</strong>
+                            <p>Auf der Seite "Urlaub/Abwesenheiten" finden Sie ein Formular für neue Abwesenheitsanträge. Wählen Sie den Abwesenheitstyp (z.B. Urlaub, Krankheit), den Zeitraum und fügen Sie bei Bedarf einen Kommentar hinzu. Ihr Antrag wird dann zur Genehmigung weitergeleitet.</p>
+                        </li>                        <li>
+                            <strong>Wie ändere ich mein Passwort?</strong>
+                            <p>Über den Link "Passwort ändern" in der Navigation gelangen Sie zur entsprechenden Seite. Geben Sie Ihr neues Passwort ein und bestätigen Sie es.</p>
+                        </li>                        <li>
+                            <strong>Was bedeuten die verschiedenen Benutzerrollen?</strong>
+                            <p>Als normaler Benutzer können Sie Ihre eigenen Zeiten und Abwesenheiten verwalten. Manager können zusätzlich Abwesenheitsanträge genehmigen und Berichte einsehen. Administratoren haben vollen Zugriff auf alle Funktionen des Systems, einschließlich Benutzerverwaltung und Rollenzuweisung.</p>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="help-category">
+                    <h3>Benutzerhandbuch</h3>
+                    <p>Ein detailliertes Benutzerhandbuch finden Sie <a href="#" target="_blank">hier</a> zum Download. Das Handbuch enthält ausführliche Anleitungen zu allen Funktionen des Systems.</p>
+                </div>
+
+                <div class="help-category">
+                    <h3>Kontakt zum Support</h3>                    <div class="contact-info">
+                        <p><strong>E-Mail:</strong> <a href="mailto:support@bbqgmbh-projekt.de">support@bbqgmbh-projekt.de</a></p>
+                        <p><strong>Telefon:</strong> +49 (0) 30 / 12345678</p>
+                        <p><strong>Erreichbar:</strong> Mo-Fr, 8:00 - 17:00 Uhr</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Über uns</h3>
+                <p>BBQ GmbH ist ein führender Anbieter von Bildungs- und Beratungslösungen für Unternehmen und Institutionen.</p>
+                <div class="social-links">
+                    <a href="/404.html?feature=social" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="/404.html?feature=social" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="/404.html?feature=social" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="/404.html?feature=social" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+              <div class="footer-section">
+                <h3>Kontakt</h3>
+                <p><i class="fas fa-map-marker-alt"></i> Digitalstraße 42, 10115 Berlin</p>
+                <p><i class="fas fa-phone"></i> +49 30 12345678</p>
+                <p><i class="fas fa-envelope"></i> info@bbqgmbh-projekt.de</p>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Links</h3>
+                <ul>
+                    <li><a href="/info.html">Über uns</a></li>                    <li><a href="/hilfe.html">Hilfe & Support</a></li>
+                    <li><a href="/datenschutz.html">Datenschutz</a></li>
+                    <li><a href="/impressum.html">Impressum</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="copyright-bar">
+            <p>&copy; 2025 BBQ GmbH Zeiterfassungssystem. Alle Rechte vorbehalten.</p>
+        </div>
+    </footer>
+    
+    <script>
+        // Function to display messages to the user
+        function displayMessage(message, type = 'info') {
+            const messageContainer = document.getElementById('message-container') || createMessageContainer();
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `alert alert-${type}`;
+            messageDiv.textContent = message;
+            messageContainer.appendChild(messageDiv);
+            setTimeout(() => messageDiv.remove(), 5000);
+        }
+
+        function createMessageContainer() {
+            const container = document.createElement('div');
+            container.id = 'message-container';
+            // Apply some basic styling for visibility
+            container.style.position = 'fixed';
+            container.style.top = '20px';
+            container.style.right = '20px';
+            container.style.zIndex = '1000';
+            container.style.width = '300px';
+            document.body.appendChild(container);
+            return container;
+        }
+
+        // Function to handle fetch requests with authorization
+        async function fetchWithAuth(url, options = {}) {
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                logout(); // Redirect to login if no token
+                throw new Error('No access token found.');
+            }
+
+            const headers = {
+                ...options.headers,
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            };
+
+            const response = await fetch(url, { ...options, headers });
+
+            if (response.status === 401) {
+                logout(); // Logout on unauthorized access
+                throw new Error('Unauthorized access.');
+            }
+            return response;
+        }        // Logout function
+        function logout() {
+            // Clear localStorage
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('currentUser');
+            
+            // Clear sessionStorage
+            sessionStorage.removeItem('accessToken');
+            sessionStorage.removeItem('currentUser');
+            
+            // Clear cookies (set them to expire)
+            document.cookie.split(";").forEach(function(c) {
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+            });
+            
+            // Redirect to Login page with capital L
+            window.location.href = '/Login.html';
+        }
+        
+        // Update navigation based on user role
+        function updateNavigationBasedOnRole(userData) {
+            const adminLinkRoles = document.getElementById('adminLinkRoles');
+            const adminLinkUsers = document.getElementById('adminLinkUsers');
+
+            // Hide all admin links by default
+            if (adminLinkRoles) adminLinkRoles.style.display = 'none';
+            if (adminLinkUsers) adminLinkUsers.style.display = 'none';
+
+            if (userData && userData.rolle) {
+                const roleName = userData.rolle.name ? userData.rolle.name.toLowerCase() : '';
+                const roleId = userData.role_id || userData.rolle.id; // Fallback for different structures
+
+                // Show "Rollenverwaltung" for Administrator (1) or Manager (2)
+                if (roleName === 'administrator' || roleName === 'manager' || roleId === 1 || roleId === 2) {
+                    if (adminLinkRoles) adminLinkRoles.style.display = 'inline-block';
+                }
+
+                // Show "Benutzerverwaltung" only for Administrator (1)
+                if (roleName === 'administrator' || roleId === 1) {
+                    if (adminLinkUsers) adminLinkUsers.style.display = 'inline-block';
+                }
+            } else if (userData && userData.roles) { // Handle cases where roles might be an array
+                 // Show "Rollenverwaltung" for Administrator (1) or Manager (2)
+                if (userData.roles.includes('Administrator') || userData.roles.includes('Manager') || userData.role_id === 1 || userData.role_id === 2) {
+                    if (adminLinkRoles) adminLinkRoles.style.display = 'inline-block';
+                }
+                // Show "Benutzerverwaltung" only for Administrator (1)
+                if (userData.roles.includes('Administrator') || userData.role_id === 1) {
+                     if (adminLinkUsers) adminLinkUsers.style.display = 'inline-block';
+                }
+            }
+        }
+
+        // Check user role and update UI
+        async function checkUserRole() {
+            try {
+                const response = await fetchWithAuth('/api/v1/users/me');
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        // fetchWithAuth already handles logout for 401
+                        return;
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const userData = await response.json();
+                localStorage.setItem('currentUser', JSON.stringify(userData)); // Store user data
+                updateNavigationBasedOnRole(userData);
+
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                // displayMessage('Sitzung abgelaufen oder Fehler beim Laden der Benutzerdaten. Bitte neu anmelden.', 'error');
+                // No explicit logout here as fetchWithAuth handles 401, other errors might not require immediate logout.
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkUserRole();
+            // The existing logout function in the HTML can be used or this one.
+            // Ensure the button calls this logout if you prefer this one.
+            const logoutButton = document.querySelector('.logout-button');
+            if (logoutButton) {
+                logoutButton.onclick = logout; // Ensure it uses the new logout function
+            }
+        });
+    </script>
+</body>
+</html>

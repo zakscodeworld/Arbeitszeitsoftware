@@ -1,0 +1,173 @@
+version: '3.8'
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  db_zeit1:
+    image: postgres:15-alpine
+    container_name: zeiterfassung_db_1
+    environment:
+      - POSTGRES_USER=pm_user
+      - POSTGRES_PASSWORD=2f4e1b73d666d6c3b632ea1a5317562a4a1373697cae6e0b5ffef1b6fc9df1ae9b31d56b4241587cdbe332b7d5142ab58a5eca7f7487e7ee27f6940f5e6c58a31b25a82836d69c3766197767f87f12465a22562b65e3f9725cc6a5f28097d18a0d2b9b265eee3f266551ee2d044f1138a8595452d6569b9849b2d5569c397f41c5bc3b2658c2702c1ca1e55defbbbdb3a6620aeeb4734c79b374d6d506484c1a3fca0d7cfe2df5f930ccb87975b2a039d94da98f821d968c67781c437d02fd0f906f11e57e9da09efb610b6fb0907be39b0e51578f8809cf3b80074e803fd03a628c20831c2eec9ffd036df1b78a0e4a9118418b53d4218dff7dd031ac0681dd
+      - POSTGRES_DB=zeiterfassung_db
+      - POSTGRES_INITDB_ARGS="--auth-host=scram-sha-256"
+    volumes:
+      - postgres_data_zeit1:/var/lib/postgresql/data
+    networks:
+      - zeit_network_1
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pm_user -d zeiterfassung_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging: *default-logging
+    restart: unless-stopped
+
+  app_zeit1:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - ENVIRONMENT=production
+    container_name: zeiterfassung_app_1
+    environment:
+      - DATABASE_SERVICE_NAME=db_zeit1
+      - DATABASE_PORT=5432
+      - APP_URL=https://zeiterfassung.zaksprojects.de
+      - SMTP_SERVER=smtp.strato.de
+      - SMTP_PORT=465
+      - SMTP_USERNAME=webmaster@zaksprojects.de
+      - SMTP_PASSWORD=Zaka123123!!
+      - SENDER_EMAIL=webmaster@zaksprojects.de
+      - SENDER_NAME=Zeiterfassung System
+      - SECRET_KEY=2f4e1b73d666d6c3b632ea1a5317562a4a1373697cae6e0b5ffef1b6fc9df1ae9b31d56b4241587cdbe332b7d5142ab58a5eca7f7487e7ee27f6940f5e6c58a31b25a82836d69c3766197767f87f12465a22562b65e3f9725cc6a5f28097d18a0d2b9b265eee3f266551ee2d044f1138a8595452d6569b9849b2d5569c397f41c5bc3b2658c2702c1ca1e55defbbbdb3a6620aeeb4734c79b374d6d506484c1a3fca0d7cfe2df5f930ccb87975b2a039d94da98f821d968c67781c437d02fd0f906f11e57e9da09efb610b6fb0907be39b0e51578f8809cf3b80074e803fd03a628c20831c2eec9ffd036df1b78a0e4a9118418b53d4218dff7dd031ac0681dd
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=60
+    depends_on:
+      db_zeit1:
+        condition: service_healthy
+    networks:
+      - zeit_network_1
+      - nginx_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging: *default-logging
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  db_zeit2:
+    image: postgres:15-alpine
+    container_name: zeiterfassung_db_2
+    environment:
+      - POSTGRES_USER=pm_user
+      - POSTGRES_PASSWORD=2f4e1b73d666d6c3b632ea1a5317562a4a1373697cae6e0b5ffef1b6fc9df1ae9b31d56b4241587cdbe332b7d5142ab58a5eca7f7487e7ee27f6940f5e6c58a31b25a82836d69c3766197767f87f12465a22562b65e3f9725cc6a5f28097d18a0d2b9b265eee3f266551ee2d044f1138a8595452d6569b9849b2d5569c397f41c5bc3b2658c2702c1ca1e55defbbbdb3a6620aeeb4734c79b374d6d506484c1a3fca0d7cfe2df5f930ccb87975b2a039d94da98f821d968c67781c437d02fd0f906f11e57e9da09efb610b6fb0907be39b0e51578f8809cf3b80074e803fd03a628c20831c2eec9ffd036df1b78a0e4a9118418b53d4218dff7dd031ac0681dd
+      - POSTGRES_DB=zeiterfassung_db
+      - POSTGRES_INITDB_ARGS="--auth-host=scram-sha-256"
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data_zeit2:/var/lib/postgresql/data
+    networks:
+      - zeit_network_2
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pm_user -d zeiterfassung_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging: *default-logging
+    restart: unless-stopped
+
+  app_zeit2:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - ENVIRONMENT=production
+    container_name: zeiterfassung_app_2
+    environment:
+      - DATABASE_SERVICE_NAME=db_zeit2
+      - DATABASE_PORT=5432
+      - APP_URL=https://zeiterfassung.zaksprojects.de
+      - SMTP_SERVER=smtp.strato.de
+      - SMTP_PORT=465
+      - SMTP_USERNAME=webmaster@zaksprojects.de
+      - SMTP_PASSWORD=Zaka123123!!
+      - SENDER_EMAIL=webmaster@zaksprojects.de
+      - SENDER_NAME=Zeiterfassung System
+      - SECRET_KEY=2f4e1b73d666d6c3b632ea1a5317562a4a1373697cae6e0b5ffef1b6fc9df1ae9b31d56b4241587cdbe332b7d5142ab58a5eca7f7487e7ee27f6940f5e6c58a31b25a82836d69c3766197767f87f12465a22562b65e3f9725cc6a5f28097d18a0d2b9b265eee3f266551ee2d044f1138a8595452d6569b9849b2d5569c397f41c5bc3b2658c2702c1ca1e55defbbbdb3a6620aeeb4734c79b374d6d506484c1a3fca0d7cfe2df5f930ccb87975b2a039d94da98f821d968c67781c437d02fd0f906f11e57e9da09efb610b6fb0907be39b0e51578f8809cf3b80074e803fd03a628c20831c2eec9ffd036df1b78a0e4a9118418b53d4218dff7dd031ac0681dd
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=60
+    ports:
+      - "8001:8000"
+    depends_on:
+      db_zeit2:
+        condition: service_healthy
+    networks:
+      - zeit_network_2
+      - nginx_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging: *default-logging
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  nginx:
+    image: nginx:alpine
+    container_name: zeiterfassung_nginx
+    volumes:
+      - ./nginx/conf:/etc/nginx/conf.d:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/logs:/var/log/nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - nginx_network
+    depends_on:
+      - app_zeit1
+      - app_zeit2
+    logging: *default-logging
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  zeit_network_1:
+    driver: bridge
+  zeit_network_2:
+    driver: bridge
+  nginx_network:
+    driver: bridge
+
+volumes:
+  postgres_data_zeit1:
+    driver: local
+  postgres_data_zeit2:
+    driver: local

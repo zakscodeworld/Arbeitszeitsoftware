@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Info - BBQ GmbH Zeiterfassung</title>    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/nav-styles.css">
+    <link rel="stylesheet" href="/static/footer-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="/static/images/BBQGmbH.png" type="image/png">
+    <script src="/static/js/nav.js" defer></script>
+    <style>
+        .info-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }          .feature-list li {
+            margin-bottom: 12px;
+            padding-left: 24px;
+            position: relative;
+            transition: transform 0.2s ease;
+        }
+        
+        .feature-list li:hover {
+            transform: translateX(5px);
+        }
+        
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: -15px;
+            color: #005cb3;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .version-info {
+            background: linear-gradient(135deg, #f5f9ff 0%, #e8f4ff 100%);
+            border-left: 4px solid #005cb3;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 25px;
+            font-size: 0.9em;
+            box-shadow: 0 2px 8px rgba(0,92,179,0.1);
+        }
+        
+        .version-info a {
+            color: #005cb3;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .version-info a:hover {
+            text-decoration: underline;
+        }
+        
+        .info-section {
+            margin-bottom: 30px;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease forwards;
+        }
+        
+        .info-section:nth-child(1) { animation-delay: 0.1s; }
+        .info-section:nth-child(2) { animation-delay: 0.2s; }
+        .info-section:nth-child(3) { animation-delay: 0.3s; }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .company-logo {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .company-logo img {
+            max-width: 120px;
+            height: auto;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #e1e9f3;
+            box-shadow: 0 3px 12px rgba(0,92,179,0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,92,179,0.15);
+        }
+        
+        .stat-card h4 {
+            color: #005cb3;
+            margin: 0 0 10px 0;
+            font-size: 1.1em;
+        }
+        
+        .stat-card p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .card {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .card h2 {
+            background: linear-gradient(135deg, #005cb3 0%, #0066cc 100%);
+            color: white;
+            margin: 0;
+            padding: 20px 25px;
+            font-weight: 600;
+        }
+        
+        .card-content {
+            padding: 30px 25px;
+        }
+        
+        .feature-list {
+            background: #f9fbff;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e8f2ff;
+        }
+    </style>
+</head>
+<body>    <header class="main-header">
+        <button id="menu-toggle" class="menu-toggle" aria-label="Toggle menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="logo-container">
+            <img src="/static/images/BBQGmbH.png" alt="BBQ GmbH Logo">
+            <h1>BBQ GmbH Zeiterfassung</h1>
+        </div>
+        <nav class="main-nav">
+            <ul>
+                <li><a href="/index.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="/arbeitszeiten.html"><i class="fas fa-clock"></i> Arbeitszeiten</a></li>
+                <li><a href="/urlaub.html"><i class="fas fa-calendar-alt"></i> Urlaub/Abwesenheiten</a></li>
+                <li><a href="/urlaube/genehmigen" id="adminLinkApprovals" style="display:none;"><i class="fas fa-check-circle"></i> Urlaubsgenehmigungen</a></li>
+                <li><a href="/rollen.html" id="adminLinkRoles" style="display:none;"><i class="fas fa-user-shield"></i> Rollenverwaltung</a></li>
+                <li><a href="/admin_benutzer.html" id="adminLinkUsers" style="display:none;"><i class="fas fa-users-cog"></i> Benutzerverwaltung</a></li>
+                <li><a href="/info.html"><i class="fas fa-info-circle"></i> Info</a></li>
+                <li><a href="/hilfe.html"><i class="fas fa-question-circle"></i> Hilfe</a></li>
+                <li><a href="/passwort.html"><i class="fas fa-key"></i> Passwort ändern</a></li>
+                <li><button class="logout-button" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Informationen</h1>
+            <p id="welcome-message"></p> <!-- Welcome message will be displayed here -->
+        </div>
+        
+        <div id="message-area"></div> <!-- For displaying messages -->
+
+        <div class="card">
+            <h2>Über die Zeiterfassung</h2>
+            <div class="card-content">
+                <div class="info-section">
+                    <h3 id="welcomeMessage">Willkommen!</h3>
+                    <p>Dies ist die Informationsseite der BBQ GmbH Zeiterfassungsanwendung. Unser modernes System bietet Ihnen eine intuitive und effiziente Lösung für alle Ihre Zeiterfassungsbedürfnisse.</p>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h4>Benutzerfreundlich</h4>
+                            <p>Intuitive Benutzeroberfläche für maximale Produktivität</p>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Sicher</h4>
+                            <p>Rollenbasierte Zugriffskontrolle und sichere Datenübertragung</p>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Effizient</h4>
+                            <p>Schnelle Zeiterfassung und automatisierte Berichte</p>
+                        </div>
+                    </div>
+                      <h4 style="margin-top: 30px; margin-bottom: 15px;">Mit dieser Anwendung können Sie:</h4>
+                    <ul class="feature-list">
+                        <li>Ihre Arbeitszeiten einfach und effizient erfassen</li>
+                        <li>Projekte und Aufgaben verwalten, denen Zeiten zugeordnet werden können</li>
+                        <li>Urlaubsanträge und andere Abwesenheiten einreichen und verwalten</li>
+                        <li>Ihr Profil und Passwort aktualisieren</li>
+                        <li>(Für Administratoren) Benutzer und deren Rollen verwalten</li>
+                        <li>(Für Manager und Administratoren) Berichte und Auswertungen einsehen</li>
+                    </ul>
+                    <p style="margin-top: 25px;"><strong>Tipp:</strong> Nutzen Sie das Menü oben, um zu den verschiedenen Bereichen der Anwendung zu navigieren.</p>
+                </div>
+
+                <div class="info-section" style="margin-top: 40px;">
+                    <h3>Über BBQ GmbH</h3>
+                    <div class="company-logo">
+                        <img src="/static/images/BBQGmbH.png" alt="BBQ GmbH Logo">
+                    </div>
+                    <p style="margin-bottom: 20px;">BBQ GmbH ist ein führendes Unternehmen im Bereich der Personaldienstleistungen und innovativen Geschäftslösungen. Mit über 20 Jahren Erfahrung entwickeln wir maßgeschneiderte Software-Lösungen, die Unternehmen dabei helfen, ihre Prozesse zu optimieren und die Produktivität zu steigern.</p>
+                    <p>Diese moderne Zeiterfassungsanwendung wurde entwickelt, um den Workflow in Ihrem Unternehmen zu revolutionieren, die administrative Arbeit zu reduzieren und gleichzeitig die Transparenz und Effizienz zu maximieren.</p>
+                </div>
+
+                <div class="version-info">                    <p><strong>🚀 Version:</strong> 1.2.0 (Aktuellste Version)</p>
+                    <p><strong>📅 Letzte Aktualisierung:</strong> 15. Mai 2025</p>
+                    <p><strong>🔧 Support:</strong> Bei Fragen oder Problemen konsultieren Sie bitte unsere umfassende <a href="/hilfe.html">Hilfe-Seite</a> oder wenden Sie sich direkt an unseren <a href="mailto:support@bbqgmbh-projekt.de">Premium Support</a>.</p>
+                    <p><strong>💡 Neue Features:</strong> Verbesserte Benutzeroberfläche, erweiterte Rollenverwaltung und optimierte Performance.</p>
+                </div>
+            </div>
+        </div>
+    </div>    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Über uns</h3>
+                <p>BBQ GmbH ist ein führender Anbieter von Bildungs- und Beratungslösungen für Unternehmen und Institutionen.</p>
+                <div class="social-links">
+                    <a href="/404.html?feature=social" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="/404.html?feature=social" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="/404.html?feature=social" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="/404.html?feature=social" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+              <div class="footer-section">
+                <h3>Kontakt</h3>
+                <p><i class="fas fa-map-marker-alt"></i> Digitalstraße 42, 10115 Berlin</p>
+                <p><i class="fas fa-phone"></i> +49 30 12345678</p>
+                <p><i class="fas fa-envelope"></i> info@bbqgmbh-projekt.de</p>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Links</h3>                <ul>
+                    <li><a href="/info.html">Über uns</a></li>
+                    <li><a href="/hilfe.html">Hilfe & Support</a></li>
+                    <li><a href="/datenschutz.html">Datenschutz</a></li>
+                    <li><a href="/impressum.html">Impressum</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="copyright-bar">
+            <p>&copy; 2025 BBQ GmbH Zeiterfassungssystem. Alle Rechte vorbehalten.</p>
+        </div>
+    </footer>
+    
+    <script>
+        const token = localStorage.getItem('accessToken');
+        const messageArea = document.getElementById('message-area');
+
+        function displayMessage(message, type = 'info') {
+            messageArea.innerHTML = `<div class="${type}"><p>${message}</p></div>`;
+            setTimeout(() => { messageArea.innerHTML = ''; }, 5000);
+        }
+
+        if (!token) {
+            window.location.href = '/login.html?message=Bitte zuerst anmelden.';
+        }
+
+        async function fetchWithAuth(url, options = {}) {
+            const headers = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+                ...options.headers,
+            };
+            const response = await fetch(url, { ...options, headers });
+            if (response.status === 401) {
+                localStorage.removeItem('accessToken');
+                window.location.href = '/login.html?message=Session abgelaufen. Bitte erneut anmelden.';
+                throw new Error('Unauthorized'); // Prevent further execution in the calling function
+            }
+            return response;
+        }        function logout() {
+            // Clear localStorage
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('currentUser');
+            
+            // Clear sessionStorage
+            sessionStorage.removeItem('accessToken');
+            sessionStorage.removeItem('currentUser');
+            
+            // Clear cookies (set them to expire)
+            document.cookie.split(";").forEach(function(c) {
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+            });
+            
+            // Redirect to Login page with capital L
+            window.location.href = '/Login.html';
+        }
+
+        function updateNavigationBasedOnRole(userData) {
+            const adminLinkRoles = document.getElementById('adminLinkRoles');
+            const adminLinkUsers = document.getElementById('adminLinkUsers');
+
+            // Hide all admin/manager links by default
+            if(adminLinkRoles) adminLinkRoles.style.display = 'none';
+            if(adminLinkUsers) adminLinkUsers.style.display = 'none';
+
+            if (userData && userData.rolle) {
+                console.log('User role for navigation:', userData.rolle.name);
+                // Show "Rollenverwaltung" for Administrator or Manager
+                if (userData.rolle.name === 'Administrator' || userData.rolle.name === 'Manager') {
+                    if(adminLinkRoles) adminLinkRoles.style.display = 'inline-block';
+                }
+                // Show "Benutzerverwaltung" only for Administrator
+                if (userData.rolle.name === 'Administrator') {
+                    if(adminLinkUsers) adminLinkUsers.style.display = 'inline-block';
+                }
+            } else if (userData && userData.role_id) { // Fallback if rolle object is not directly available
+                 console.log('User role_id for navigation:', userData.role_id);
+                // Role ID 1 for Administrator, Role ID 2 for Manager (adjust if IDs are different)
+                if (userData.role_id === 1 || userData.role_id === 2) { // Admin or Manager
+                    if(adminLinkRoles) adminLinkRoles.style.display = 'inline-block';
+                }
+                if (userData.role_id === 1) { // Admin only
+                    if(adminLinkUsers) adminLinkUsers.style.display = 'inline-block';
+                }
+            } else {
+                console.warn('Rolleninformationen nicht im erwarteten Format oder nicht vorhanden:', userData);
+            }
+        }
+
+        async function checkUserRole() {
+            console.log('checkUserRole aufgerufen');
+            if (!token) {
+                console.log('Kein Token gefunden, Umleitung zum Login.');
+                window.location.href = '/login.html';
+                return null;
+            }
+            try {
+                const response = await fetchWithAuth('/api/v1/users/me'); // Ensure this endpoint is correct
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ detail: `HTTP error! status: ${response.status}` }));
+                    console.error('Fehler beim Abrufen der Benutzerrolle:', errorData.detail);
+                    if (response.status === 401) logout(); // Explicit logout on 401
+                    displayMessage(`Fehler beim Laden der Benutzerinformationen: ${errorData.detail || response.statusText}`);
+                    return null;
+                }
+                const userData = await response.json();
+                console.log('Benutzerdaten empfangen:', userData);
+                if (userData) {
+                    updateNavigationBasedOnRole(userData);
+                    // Update welcome message
+                    const welcomeMessageElement = document.getElementById('welcome-message');
+                    if (welcomeMessageElement && userData.vorname && userData.nachname) {
+                        welcomeMessageElement.textContent = `Willkommen zurück, ${userData.vorname} ${userData.nachname}!`;
+                    } else if (welcomeMessageElement && userData.username) {
+                         welcomeMessageElement.textContent = `Willkommen zurück, ${userData.username}!`;
+                    }
+                    return { role: userData.rolle ? userData.rolle.name : null, role_id: userData.role_id, username: userData.username, vorname: userData.vorname, nachname: userData.nachname };
+                } else {
+                    console.warn('Keine Benutzerdaten empfangen oder Format unerwartet.');
+                    displayMessage('Benutzerdaten konnten nicht verarbeitet werden.');
+                    return null;
+                }
+            } catch (error) {
+                console.error('Schwerwiegender Fehler in checkUserRole:', error);
+                displayMessage('Ein schwerwiegender Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.');
+                // Consider logging out or other fallback actions if user data is critical
+                // logout(); // Optional: logout on any critical error fetching user data
+                return null;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            await checkUserRole(); // This will also update navigation and welcome message
+
+            // Any other info.html specific initializations can go here
+            console.log("Info-Seite geladen und Benutzerrolle geprüft.");
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rollenverwaltung - BBQ GmbH Zeiterfassung</title>    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/nav-styles.css">
+    <link rel="stylesheet" href="/static/footer-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="/static/images/BBQGmbH.png" type="image/png">
+    <script src="/static/js/nav.js" defer></script>
+    <style>
+        .role-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .edit-modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close-button:hover,
+        .close-button:focus {
+            color: #333;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>    <header class="main-header">
+        <button id="menu-toggle" class="menu-toggle" aria-label="Toggle menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="logo-container">
+            <img src="/static/images/BBQGmbH.png" alt="BBQ GmbH Logo">
+            <h1>BBQ GmbH Zeiterfassung</h1>
+        </div>
+        <nav class="main-nav">
+            <ul>
+                <li><a href="/index.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="/arbeitszeiten.html"><i class="fas fa-clock"></i> Arbeitszeiten</a></li>
+                <li><a href="/urlaub.html"><i class="fas fa-calendar-alt"></i> Urlaub/Abwesenheiten</a></li>
+                <li><a href="/urlaube/genehmigen" id="adminLinkApprovals"><i class="fas fa-check-circle"></i> Urlaubsgenehmigungen</a></li>
+                <li><a href="/rollen.html" id="adminLinkRoles" class="active"><i class="fas fa-user-shield"></i> Rollenverwaltung</a></li>
+                <li><a href="/admin_benutzer.html" id="adminLinkUsers"><i class="fas fa-users-cog"></i> Benutzerverwaltung</a></li>
+                <li><a href="/info.html"><i class="fas fa-info-circle"></i> Info</a></li>
+                <li><a href="/hilfe.html"><i class="fas fa-question-circle"></i> Hilfe</a></li>
+                <li><a href="/passwort.html"><i class="fas fa-key"></i> Passwort ändern</a></li>
+                <li><button class="logout-button" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Rollenverwaltung</h1>
+        </div>
+        
+        <div id="message-area" class="message-area" style="display:none;"></div>
+        
+        <div class="card-container">
+            <div class="card">
+                <h2>Neue Rolle anlegen</h2>
+                <div class="card-content">
+                    <form id="add-role-form">
+                        <label for="role-name">Bezeichnung der Rolle:</label>
+                        <input type="text" id="role-name" name="name" placeholder="z.B. Manager, Entwickler" required>
+                        <button type="submit" class="button">Rolle hinzufügen</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Bestehende Rollen</h2>
+                <div class="card-content">
+                    <div class="table-wrapper">
+                        <table id="roles-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Bezeichnung</th>
+                                    <th>Aktionen</th>
+                                </tr>
+                            </thead>
+                            <tbody id="roles-tbody">
+                                <tr>
+                                    <td colspan="3">Lade Rollen...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Edit Role Modal -->
+        <div id="edit-role-modal" class="edit-modal">
+            <div class="modal-content">
+                <span class="close-button" onclick="closeEditModal()">&times;</span>
+                <h2>Rolle bearbeiten</h2>
+                <form id="edit-role-form">
+                    <input type="hidden" id="edit-role-id" name="id">
+                    <label for="edit-role-name">Neue Bezeichnung:</label>
+                    <input type="text" id="edit-role-name" name="name" required>
+                    <div class="modal-buttons">
+                        <button type="button" class="button secondary" onclick="closeEditModal()">Abbrechen</button>
+                        <button type="submit" class="button">Änderungen speichern</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Über uns</h3>
+                <p>BBQ GmbH ist ein führender Anbieter von Bildungs- und Beratungslösungen für Unternehmen und Institutionen.</p>
+                <div class="social-links">
+                    <a href="/404.html?feature=social" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="/404.html?feature=social" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="/404.html?feature=social" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="/404.html?feature=social" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+              <div class="footer-section">
+                <h3>Kontakt</h3>
+                <p><i class="fas fa-map-marker-alt"></i> Digitalstraße 42, 10115 Berlin</p>
+                <p><i class="fas fa-phone"></i> +49 30 12345678</p>
+                <p><i class="fas fa-envelope"></i> info@bbqgmbh-projekt.de</p>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Links</h3>                <ul>
+                    <li><a href="/info.html">Über uns</a></li>
+                    <li><a href="/hilfe.html">Hilfe & Support</a></li>
+                    <li><a href="/datenschutz.html">Datenschutz</a></li>
+                    <li><a href="/impressum.html">Impressum</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="copyright-bar">
+            <p>&copy; 2025 BBQ GmbH Zeiterfassungssystem. Alle Rechte vorbehalten.</p>
+        </div>
+    </footer>
+    
+    <script>        // Logout function
+        window.logout = function() {
+            // Clear localStorage
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('currentUser');
+            
+            // Clear sessionStorage
+            sessionStorage.removeItem('accessToken');
+            sessionStorage.removeItem('currentUser');
+            
+            // Clear cookies (set them to expire)
+            document.cookie.split(";").forEach(function(c) {
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+            });
+            
+            // Redirect to Login page with capital L
+            window.location.href = '/Login.html';
+        }
+
+        const messageArea = document.getElementById('message-area');
+        const addRoleForm = document.getElementById('add-role-form');
+        const rolesTbody = document.getElementById('roles-tbody');
+        const editRoleModal = document.getElementById('edit-role-modal');
+        const editRoleForm = document.getElementById('edit-role-form');
+
+        // Display message function
+        function displayMessage(message, type = 'error') {
+            messageArea.innerHTML = `<p>${message}</p>`;
+            messageArea.className = 'message-area';
+            messageArea.classList.add(type);
+            messageArea.style.display = 'block';
+            setTimeout(() => { 
+                messageArea.style.display = 'none'; 
+            }, 5000);
+        }
+
+        // Check if user is authorized (admin)
+        async function checkAdminAccess() {
+            const token = localStorage.getItem('accessToken');
+            if (!token) {
+                window.location.href = '/login.html';
+                return false;
+            }
+
+            try {
+                const response = await fetch('/auth/users/me', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Not authorized');
+                }                const userData = await response.json();                
+                // Update navigation based on user role
+                // Check if user has admin privileges
+                const isAdmin = userData.role_id === 1 || (userData.rolle && userData.rolle.name === 'Administrator');
+                
+                // Check if user has manager privileges
+                const isManager = userData.role_id === 2 || (userData.rolle && userData.rolle.name === 'Manager');
+                
+                // Update navigation menu display
+                if (isAdmin || isManager) {
+                    document.getElementById('adminLinkRoles').style.display = 'inline-block';
+                }
+                
+                if (isAdmin) {
+                    document.getElementById('adminLinkUsers').style.display = 'inline-block';
+                }
+                
+                // For Rollenverwaltung page: Allow both Admin and Manager
+                if (!isAdmin && !isManager) {
+                    displayMessage('Zugriff verweigert. Sie benötigen Administrator- oder Manager-Rechte für diese Seite.', 'error');
+                    setTimeout(() => {
+                        window.location.href = '/index.html';
+                    }, 3000);
+                    return false;
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Authorization check failed:', error);
+                window.location.href = '/login.html';
+                return false;
+            }
+        }
+
+        // Fetch and display roles
+        async function fetchRoles() {
+            const token = localStorage.getItem('accessToken');
+            try {                const response = await fetch('/api/v1/roles/', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch roles');
+                }
+                
+                const roles = await response.json();
+                rolesTbody.innerHTML = '';
+                
+                roles.forEach(role => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${role.id}</td>
+                        <td>${role.name}</td>
+                        <td class="role-actions">
+                            <button class="button secondary" onclick="openEditModal(${role.id}, '${role.name}')">Bearbeiten</button>
+                            <button class="button danger" onclick="deleteRole(${role.id})">Löschen</button>
+                        </td>
+                    `;
+                    rolesTbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error fetching roles:', error);
+                displayMessage('Fehler beim Laden der Rollen.', 'error');
+            }
+        }
+
+        // Add new role
+        addRoleForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem('accessToken');
+            const roleName = document.getElementById('role-name').value;
+            
+            try {                const response = await fetch('/api/v1/roles/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ name: roleName })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to add role');
+                }
+                
+                document.getElementById('role-name').value = '';
+                displayMessage('Rolle erfolgreich hinzugefügt!', 'success');
+                fetchRoles();
+            } catch (error) {
+                console.error('Error adding role:', error);
+                displayMessage('Fehler beim Hinzufügen der Rolle.', 'error');
+            }
+        });
+
+        // Open edit modal
+        function openEditModal(id, name) {
+            document.getElementById('edit-role-id').value = id;
+            document.getElementById('edit-role-name').value = name;
+            editRoleModal.style.display = 'block';
+        }
+
+        // Close edit modal
+        function closeEditModal() {
+            editRoleModal.style.display = 'none';
+        }
+
+        // Update role
+        editRoleForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem('accessToken');
+            const roleId = document.getElementById('edit-role-id').value;
+            const roleName = document.getElementById('edit-role-name').value;
+              try {
+                const response = await fetch(`/api/v1/roles/${roleId}/`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ name: roleName })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to update role');
+                }
+                
+                closeEditModal();
+                displayMessage('Rolle erfolgreich aktualisiert!', 'success');
+                fetchRoles();
+            } catch (error) {
+                console.error('Error updating role:', error);
+                displayMessage('Fehler beim Aktualisieren der Rolle.', 'error');
+            }
+        });        // Delete role
+        async function deleteRole(id) {
+            if (!confirm('Sind Sie sicher, dass Sie diese Rolle löschen möchten?')) {
+                return;
+            }
+            
+            const token = localStorage.getItem('accessToken');
+            try {
+                const response = await fetch(`/api/v1/roles/${id}/`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to delete role');
+                }
+                
+                displayMessage('Rolle erfolgreich gelöscht!', 'success');
+                fetchRoles();
+            } catch (error) {
+                console.error('Error deleting role:', error);
+                displayMessage('Fehler beim Löschen der Rolle.', 'error');
+            }
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            if (event.target == editRoleModal) {
+                closeEditModal();
+            }
+        };
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (await checkAdminAccess()) {
+                fetchRoles();
+            }
+        });
+    </script>
+</body>
+</html>

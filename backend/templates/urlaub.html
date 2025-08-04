@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Abwesenheiten verwalten | BBQ GmbH</title>  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="stylesheet" href="/static/nav-styles.css">
+  <link rel="stylesheet" href="/static/footer-styles.css">
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" href="/static/images/BBQGmbH.png" type="image/png">
+  <script src="/static/js/nav.js" defer></script>
+  <style>
+    .vacation-gallery {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        gap: 15px;
+        margin-top: 10px;
+    }
+    .vacation-gallery img {
+        width: 48%;
+        max-width: 300px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .vacation-gallery img:hover {
+        transform: scale(1.03);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+    @media (max-width: 768px) {
+        .vacation-gallery img {
+            width: 100%;
+            max-width: 100%;
+            margin-bottom: 15px;
+        }
+    }
+  </style>
+</head>
+<body>
+    <header class="main-header">
+        <button id="menu-toggle" class="menu-toggle" aria-label="Toggle menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="logo-container">
+            <img src="/static/images/BBQGmbH.png" alt="BBQ GmbH Logo">
+            <h1>BBQ GmbH Zeiterfassung</h1>
+        </div>
+        <nav class="main-nav">
+            <ul>                <li><a href="/index.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="/arbeitszeiten.html"><i class="fas fa-clock"></i> Arbeitszeiten</a></li>
+                <li><a href="/urlaub.html"><i class="fas fa-calendar-alt"></i> Urlaub/Abwesenheiten</a></li>
+                <li><a href="/urlaube/genehmigen" id="adminLinkApprovals" style="display:none;"><i class="fas fa-check-circle"></i> Urlaubsgenehmigungen</a></li>
+                <li><a href="/rollen.html" id="adminLinkRoles" style="display:none;"><i class="fas fa-user-shield"></i> Rollenverwaltung</a></li>
+                <li><a href="/admin_benutzer.html" id="adminLinkUsers" style="display:none;"><i class="fas fa-users-cog"></i> Benutzerverwaltung</a></li>
+                <li><a href="/info.html"><i class="fas fa-info-circle"></i> Info</a></li>
+                <li><a href="/hilfe.html"><i class="fas fa-question-circle"></i> Hilfe</a></li>
+                <li><a href="/passwort.html"><i class="fas fa-key"></i> Passwort ändern</a></li>
+                <li><button class="logout-button" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Abwesenheiten verwalten</h1>
+        </div>
+        
+        <div id="message-area"></div>
+
+        <div class="card-container">
+            <div class="card">
+                <h2>Neue Abwesenheit eintragen</h2>
+                <div class="card-content">
+                    <form id="add-absence-form">
+                        <div class="form-group">
+                            <label for="abwesenheit_typ_id">Typ der Abwesenheit:</label>
+                            <select id="abwesenheit_typ_id" name="abwesenheit_typ_id" required></select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="start_datum">Startdatum:</label>
+                            <input type="date" id="start_datum" name="start_datum" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="end_datum">Enddatum:</label>
+                            <input type="date" id="end_datum" name="end_datum" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="kommentar">Kommentar (optional):</label>
+                            <textarea id="kommentar" name="kommentar"></textarea>
+                        </div>
+
+                        <button type="submit">Beantragen</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-container">
+            <div class="card">
+                <h2>Kalenderansicht</h2>
+                <div class="card-content">
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="showOnlyMine" checked>
+                            <span class="checkbox-text">Nur meine Abwesenheiten anzeigen</span>
+                        </label>
+                    </div>
+                    <div id="calendar"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Meine Abwesenheiten</h2>
+            <div class="card-content">
+                <table id="absences-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Typ</th>
+                            <th>Startdatum</th>
+                            <th>Enddatum</th>
+                            <th>Status</th>
+                            <th>Kommentar</th>
+                            <th>Aktionen</th>
+                        </tr>
+                    </thead>
+                    <tbody id="absences-tbody">
+                        <!-- Rows will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Inspiration für Ihren nächsten Urlaub</h2>
+            <div class="card-content">
+                <div class="vacation-gallery">
+                    <img src="/static/images/beach.jpg" alt="Strand">
+                    <img src="/static/images/mountains.jpg" alt="Berge">
+                    <img src="/static/images/city.jpg" alt="Stadt">
+                    <img src="/static/images/forest.jpg" alt="Wald">
+                </div>
+            </div>
+        </div>
+    </div>    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Über uns</h3>
+                <p>BBQ GmbH ist ein führender Anbieter von Bildungs- und Beratungslösungen für Unternehmen und Institutionen.</p>
+                <div class="social-links">
+                    <a href="/404.html?feature=social" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="/404.html?feature=social" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="/404.html?feature=social" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="/404.html?feature=social" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+              <div class="footer-section">
+                <h3>Kontakt</h3>
+                <p><i class="fas fa-map-marker-alt"></i> Digitalstraße 42, 10115 Berlin</p>
+                <p><i class="fas fa-phone"></i> +49 30 12345678</p>
+                <p><i class="fas fa-envelope"></i> info@bbqgmbh-projekt.de</p>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Links</h3>                <ul>
+                    <li><a href="/info.html">Über uns</a></li>
+                    <li><a href="/hilfe.html">Hilfe & Support</a></li>
+                    <li><a href="/datenschutz.html">Datenschutz</a></li>
+                    <li><a href="/impressum.html">Impressum</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="copyright-bar">
+            <p>&copy; 2025 BBQ GmbH Zeiterfassungssystem. Alle Rechte vorbehalten.</p>
+        </div>
+    </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+  <script>
+    const token = localStorage.getItem('accessToken'); // Updated from 'jwt-token'
+    const messageArea = document.getElementById('message-area');
+    let calendar;
+    let currentUserId = null;
+
+    function displayMessage(message, type = 'error') {
+        messageArea.innerHTML = `<div class="${type}"><p>${message}</p></div>`;
+        setTimeout(() => { messageArea.innerHTML = ''; }, 5000);
+    }
+
+    if (!token) {
+        window.location.href = '/login.html?message=Bitte zuerst anmelden.';
+    }
+
+    async function fetchWithAuth(url, options = {}) {
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            ...options.headers,
+        };
+        const response = await fetch(url, { ...options, headers });
+        if (response.status === 401) {
+            localStorage.removeItem('accessToken'); // Updated from 'jwt-token'
+            window.location.href = '/login.html?message=Session abgelaufen. Bitte erneut anmelden.';
+            throw new Error('Unauthorized');
+        }
+        return response;
+    }
+
+    async function fetchCurrentUserId() {
+        try {
+            const response = await fetchWithAuth('/auth/users/me');
+            if (!response.ok) throw new Error('Benutzerdetails konnten nicht geladen werden.');
+            const user = await response.json();
+            currentUserId = user.id;
+        } catch (error) {
+            console.error('Fehler beim Laden der Benutzer-ID:', error);
+            displayMessage(error.message);
+            // Potentially redirect or disable functionality if user ID is crucial and not fetched
+        }
+    }
+
+    async function fetchAbsenceTypes() {
+        try {
+            const response = await fetchWithAuth('/api/v1/absence-types/');
+            if (!response.ok) throw new Error('Abwesenheitstypen konnten nicht geladen werden.');
+            const types = await response.json();
+            const selectElement = document.getElementById('abwesenheit_typ_id');
+            selectElement.innerHTML = '<option value="">Typ auswählen</option>';
+            types.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type.id;
+                option.textContent = type.name;
+                selectElement.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Fehler beim Laden der Abwesenheitstypen:', error);
+            displayMessage(error.message);
+        }
+    }
+
+    function formatAbsencesForCalendar(absences) {
+        return absences.map(absence => ({
+            id: absence.id, // Keep track of absence ID
+            title: `${absence.abwesenheit_typ ? absence.abwesenheit_typ.name : 'Abwesenheit'} (${absence.status})`, // Show type and status
+            start: absence.start_datum,
+            // FullCalendar's end date is exclusive, so add 1 day if it's an all-day event spanning multiple days.
+            // Or ensure your API returns end_datum as the day *after* the last day of absence for full-day events.
+            // For now, assuming start_datum and end_datum are inclusive and represent full days.
+            end: new Date(new Date(absence.end_datum).setDate(new Date(absence.end_datum).getDate() + 1)).toISOString().split('T')[0],
+            color: absence.status === 'genehmigt' ? '#4CAF50' : (absence.status === 'abgelehnt' ? '#F44336' : '#FFC107'), // Green for approved, Red for rejected, Yellow for pending
+            extendedProps: {
+                kommentar: absence.kommentar,
+                status: absence.status,
+                typ_id: absence.abwesenheit_typ ? absence.abwesenheit_typ.id : absence.abwesenheit_typ_id,
+                typ_name: absence.abwesenheit_typ ? absence.abwesenheit_typ.name : 'Abwesenheit'
+            }
+        }));
+    }
+
+    async function fetchAndDisplayAbsences(showOnlyMine = true) {
+        if (!currentUserId) {
+            // Wait for user ID if not available yet
+            return;
+        }
+        try {
+            // Fetch absences with or without user filter
+            const url = showOnlyMine ? 
+                `/api/v1/absences/?benutzer_id=${currentUserId}` :
+                '/api/v1/absences/';
+            
+            const response = await fetchWithAuth(url);
+            if (!response.ok) throw new Error('Abwesenheiten konnten nicht geladen werden.');
+            const absences = await response.json();
+
+            // Populate Calendar
+            if (calendar) {
+                calendar.removeAllEvents();
+                calendar.addEventSource(formatAbsencesForCalendar(absences));
+            }
+
+            // Update table if it exists
+            const tbody = document.getElementById('absences-tbody');
+            if (tbody) {
+                tbody.innerHTML = '';
+                if (absences.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7">Keine Abwesenheiten erfasst.</td></tr>';
+                    return;
+                }
+                absences.forEach(absence => {
+                    const row = tbody.insertRow();
+                    row.insertCell().textContent = absence.id;
+                    row.insertCell().textContent = absence.abwesenheit_typ ? absence.abwesenheit_typ.name : (absence.abwesenheit_typ_id || '-');
+                    row.insertCell().textContent = new Date(absence.start_datum).toLocaleDateString('de-DE');
+                    row.insertCell().textContent = new Date(absence.end_datum).toLocaleDateString('de-DE');
+                    row.insertCell().textContent = absence.status;
+                    row.insertCell().textContent = absence.kommentar || '-';
+                    
+                    const actionsCell = row.insertCell();
+                    // Only allow deletion if it's the user's own absence and status is 'beantragt'
+                    if (absence.status === 'beantragt' && absence.benutzer_id === currentUserId) { 
+                        const deleteButton = document.createElement('button');
+                        deleteButton.textContent = 'Löschen';
+                        deleteButton.classList.add('danger');
+                        deleteButton.onclick = () => deleteAbsence(absence.id);
+                        actionsCell.appendChild(deleteButton);
+                    }
+                });
+            }
+        } catch (error) {
+            console.error('Fehler beim Laden der Abwesenheiten:', error);
+            displayMessage(error.message);
+        }
+    }
+
+    document.getElementById('add-absence-form').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        if (!currentUserId) {
+            displayMessage('Benutzer-ID nicht verfügbar. Antrag kann nicht gestellt werden.');
+            return;
+        }
+
+        const formData = new FormData(this);
+        const data = {
+            benutzer_id: currentUserId, // Should be set by the backend based on authenticated user
+            abwesenheit_typ_id: parseInt(formData.get('abwesenheit_typ_id')),
+            start_datum: formData.get('start_datum'),
+            end_datum: formData.get('end_datum'),
+            kommentar: formData.get('kommentar'),
+            status: 'beantragt' // Default status for new requests
+        };
+
+        if (new Date(data.end_datum) < new Date(data.start_datum)) {
+            displayMessage('Enddatum darf nicht vor dem Startdatum liegen.');
+            return;
+        }
+        if (isNaN(data.abwesenheit_typ_id) || data.abwesenheit_typ_id <= 0) {
+            displayMessage('Bitte wählen Sie einen gültigen Abwesenheitstyp.');
+            return;
+        }
+
+        try {
+            const response = await fetchWithAuth('/api/v1/absences/', {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ detail: 'Unbekannter Fehler.' }));
+                throw new Error(errorData.detail || `Fehler: ${response.statusText}`);
+            }
+            await response.json(); // const newAbsence = await response.json();
+            displayMessage('Abwesenheitsantrag erfolgreich gestellt.', 'success');
+            this.reset();
+            fetchAndDisplayAbsences(); // Refresh calendar and list
+        } catch (error) {
+            console.error('Fehler beim Erstellen der Abwesenheit:', error);
+            displayMessage(error.message);
+        }
+    });
+
+    async function deleteAbsence(absenceId) {
+        if (!confirm('Sind Sie sicher, dass Sie diesen Abwesenheitsantrag zurückziehen möchten?')) {
+            return;
+        }
+        try {
+            const response = await fetchWithAuth(`/api/v1/absences/${absenceId}`, { method: 'DELETE' });
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ detail: 'Unbekannter Fehler.' }));
+                throw new Error(errorData.detail || `Fehler: ${response.statusText}`);
+            }
+            displayMessage('Abwesenheit erfolgreich gelöscht/zurückgezogen.', 'success');
+            fetchAndDisplayAbsences(); // Refresh calendar and list
+        } catch (error) {
+            console.error('Fehler beim Löschen der Abwesenheit:', error);
+            displayMessage(error.message);
+        }
+    }    function logout() {
+        // Clear localStorage
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('currentUser');
+        
+        // Clear sessionStorage
+        sessionStorage.removeItem('accessToken');
+        sessionStorage.removeItem('currentUser');
+        
+        // Clear cookies (set them to expire)
+        document.cookie.split(";").forEach(function(c) {
+            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+        });
+        
+        // Redirect to Login page with capital L
+        window.location.href = '/Login.html';
+    }
+
+    async function checkAdminRoleForNav() {
+        const currentToken = localStorage.getItem('accessToken');
+        if (!currentToken) {
+            window.location.href = '/login.html';
+            return;
+        }
+        try {
+            const response = await fetch('/auth/users/me', {
+                headers: { 'Authorization': `Bearer ${currentToken}` }
+            });
+            if (response.ok) {
+                const user = await response.json();                
+                if (user.rolle && (user.rolle.name === 'Administrator' || user.rolle.name === 'Manager')) {
+                    const adminLinkRoles = document.getElementById('adminLinkRoles');
+                    const adminLinkUsers = document.getElementById('adminLinkUsers');
+                    const adminLinkApprovals = document.getElementById('adminLinkApprovals');
+                    
+                    if(adminLinkRoles) adminLinkRoles.style.display = 'inline-block';
+                    if(adminLinkApprovals) adminLinkApprovals.style.display = 'inline-block';
+                    // Only show user management to Administrators
+                    if(adminLinkUsers && user.rolle.name === 'Administrator') adminLinkUsers.style.display = 'inline-block';
+                }
+            } else if (response.status === 401) {
+                logout(); // Token is invalid or expired
+            }
+        } catch (error) {
+            console.error('Error fetching user role for nav:', error);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!token) {
+        window.location.href = '/login.html';
+        return;
+      }
+
+      // Set up the calendar filter toggle
+      const showOnlyMine = document.getElementById('showOnlyMine');
+      showOnlyMine.addEventListener('change', (e) => {
+        fetchAndDisplayAbsences(e.target.checked);
+      });
+
+      checkAdminRoleForNav();
+      await fetchCurrentUserId(); // Fetch user ID first
+      fetchAbsenceTypes();
+      
+      const calendarEl = document.getElementById('calendar');
+      calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'de',
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,timeGridWeek'
+        },
+        events: [],
+        eventClick: function(info) {
+          const event = info.event;
+          const props = event.extendedProps;
+          alert(`
+              Typ: ${props.typ_name}
+              Status: ${props.status}
+              ${props.kommentar ? 'Kommentar: ' + props.kommentar : ''}
+          `.trim());
+        }
+      });
+      calendar.render();
+      
+      // Initial load of absences with filter
+      fetchAndDisplayAbsences(showOnlyMine.checked);
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const calendarEl = document.getElementById('calendar');
+      const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'de',
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,timeGridWeek'
+        },
+        selectable: true,
+        selectMirror: true,
+        events: [
+          {% for u in urlaube %}
+          {
+            title: "{{ u.grund or 'Urlaub' }}",
+            start: "{{ u.start }}",
+            end:   "{{ u.ende }}",
+            color: '#4CAF50'
+          }{% if not loop.last %},{% endif %}
+          {% endfor %}
+        ],
+        select: info => {
+          const grund = prompt("Grund für den Urlaub:");
+          if (grund) {
+            fetch('/urlaube/dashboard', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                benutzer_id: 1,  // TODO: mit echtem User ersetzen
+                start: info.startStr,
+                ende: info.endStr,
+                grund
+              })
+            })
+            .then(r => r.json())
+            .then(ev => {
+              calendar.addEvent({
+                title: ev.grund,
+                start: ev.start,
+                end:   ev.ende,
+                color: '#4CAF50'
+              });
+              // Kalender nach dem Hinzufügen aktualisieren
+              calendar.refetchEvents();
+            })
+            .catch(e => {
+              alert("Fehler: " + e);
+              calendar.refetchEvents();
+            });
+          }
+          calendar.unselect();
+        },
+        eventClick: function(info) {
+          if (confirm('Möchten Sie diesen Urlaubseintrag löschen?')) {
+            const eventId = info.event.id;
+            fetch('/urlaube/' + eventId, {
+              method: 'DELETE'
+            })
+            .then(response => {
+              if (response.ok) {
+                info.event.remove();
+                // Kalender nach dem Löschen aktualisieren
+                calendar.refetchEvents();
+              } else {
+                throw new Error('Fehler beim Löschen des Urlaubs');
+              }
+            })
+            .catch(error => {
+              alert(error.message);
+              calendar.refetchEvents();
+            });
+          }
+        }
+      });
+      
+      // Kalender initial rendern
+      calendar.render();
+      
+      // Automatische Aktualisierung alle 20 Sekunden
+      setInterval(() => {
+        console.log('Aktualisiere Kalender...');
+        calendar.refetchEvents();
+      }, 20000); // 20 Sekunden
+    });
+  </script>
+</body>
+</html>

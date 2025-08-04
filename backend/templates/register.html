@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <title>Registrierung | BBQ GmbH</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="stylesheet" href="/static/footer-styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="icon" href="/static/images/BBQGmbH.png" type="image/png">
+  <style>
+    .register-page {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      justify-content: center;
+      align-items: center;
+      background-color: #f0f4f8;
+    }
+    
+    .register-container {
+      max-width: 500px;
+      width: 90%;
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      margin-bottom: 20px;
+    }
+    
+    .register-header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    
+    .register-header img {
+      height: 70px;
+      margin-bottom: 15px;
+    }
+    
+    .register-header h1 {
+      color: #004a99;
+      font-size: 1.8em;
+      margin-bottom: 10px;
+    }
+    
+    .register-form {
+      margin-bottom: 20px;
+    }
+    
+    .register-links {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    
+    .register-links a {
+      color: #005cb3;
+      text-decoration: none;
+      font-size: 0.9em;
+    }
+    
+    .register-links a:hover {
+      text-decoration: underline;
+    }
+    
+    .register-footer {
+      text-align: center;
+      color: #666;
+      font-size: 0.8em;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body class="register-page">
+  <div class="register-container">
+    <div class="register-header">
+      <img src="/static/images/BBQGmbH.png" alt="BBQ GmbH Logo">
+      <h1>Neues Konto anlegen</h1>
+      {% if error %}
+      <p class="error" style="color:red">{{ error }}</p>
+      {% endif %}
+      <div id="message-area" class="message-area" style="display:none;"></div>
+    </div>    <form id="registerForm" class="register-form">
+      <label for="nutzername">Nutzername:</label>
+      <input type="text" id="nutzername" name="nutzername" placeholder="Nutzername sollte mindestens 5 Zeichen lang sein" minlength="5" maxlength="50" required>
+      
+      <label for="email">E-Mail:</label>
+      <input type="email" id="email" name="email" placeholder="E-Mail Adresse eingeben" maxlength="100" required>
+
+      <label for="vorname">Vorname:</label>
+      <input type="text" id="vorname" name="vorname" placeholder="Vorname eingeben" maxlength="40" required>
+      
+      <label for="nachname">Nachname:</label>
+      <input type="text" id="nachname" name="nachname" placeholder="Nachname eingeben" maxlength="40" required>
+      
+      <label for="passwort">Passwort:</label>
+      <input type="password" id="passwort" name="passwort" placeholder="Mindestens 12 Zeichen" minlength="12" maxlength="50" required>
+      
+      <label for="rolle_id">Rolle:</label>
+      <select id="rolle_id" name="rolle_id" required>
+        <option value="" disabled selected>Bitte wählen</option>
+        {% for r in rollen %}
+        <option value="{{ r.id }}">{{ r.name }}</option>
+        {% endfor %}
+      </select>
+      
+      <button type="submit" class="button">Registrieren</button>
+    </form>
+    <div class="register-links">
+      <a href="/login.html">Bereits registriert? Login</a>
+    </div>  </div>
+  
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Über uns</h3>
+        <p>BBQ GmbH - Ihr Partner für professionelle Zeiterfassung und Projektmanagement.</p>
+        <div class="social-links">
+          <a href="/404.html?feature=social" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="/404.html?feature=social" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+          <a href="/404.html?feature=social" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+          <a href="/404.html?feature=social" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        </div>
+      </div>
+      
+      <div class="footer-section">
+        <h3>Kontakt</h3>
+        <p><i class="fas fa-map-marker-alt"></i> Digitalstraße 42, 10115 Berlin</p>
+        <p><i class="fas fa-phone"></i> +49 30 12345678</p>
+        <p><i class="fas fa-envelope"></i> info@bbqgmbh-projekt.de</p>
+      </div>
+      
+      <div class="footer-section">
+        <h3>Links</h3>
+        <ul>
+          <li><a href="/hilfe.html">Hilfe & Support</a></li>
+          <li><a href="/datenschutz.html">Datenschutz</a></li>
+          <li><a href="/impressum.html">Impressum</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="copyright-bar">
+      <p>&copy; 2025 BBQ GmbH Zeiterfassungssystem. Alle Rechte vorbehalten.</p>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const registerForm = document.getElementById('registerForm');
+        const messageArea = document.getElementById('message-area');
+        
+        registerForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            // Hide any previous messages
+            messageArea.style.display = 'none';
+            
+            const username = document.getElementById('nutzername').value;
+            const email = document.getElementById('email').value;
+            const vorname = document.getElementById('vorname').value;
+            const nachname = document.getElementById('nachname').value;
+            const password = document.getElementById('passwort').value;
+            const rolle_id = parseInt(document.getElementById('rolle_id').value);
+
+            const userData = {
+                username: username,
+                email: email,
+                vorname: vorname,
+                nachname: nachname,
+                passwort: password,
+                rolle_id: rolle_id,
+                ist_aktiv: true // Default to active
+            };
+
+            try {
+                const response = await fetch('/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(userData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    messageArea.textContent = 'Registrierung erfolgreich! Sie werden zum Login weitergeleitet.';
+                    messageArea.classList.add('success');
+                    messageArea.classList.remove('error');
+                    messageArea.style.display = 'block';
+                    
+                    // Redirect to login page after 3 seconds
+                    setTimeout(() => {
+                        window.location.href = '/login.html';
+                    }, 3000);
+                } else {
+                    messageArea.textContent = data.detail || 'Registrierung fehlgeschlagen.';
+                    messageArea.classList.add('error');
+                    messageArea.classList.remove('success');
+                    messageArea.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                messageArea.textContent = 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
+                messageArea.classList.add('error');
+                messageArea.classList.remove('success');
+                messageArea.style.display = 'block';            }
+        });
+    });
+  </script>
+</body>
+</html>

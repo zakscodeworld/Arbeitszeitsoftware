@@ -1,0 +1,825 @@
+
+/* Global Reset & Base Styles */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* Browser Notification Styles */
+.notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    width: 350px;
+    max-width: 90%;
+}
+
+.notification {
+    background-color: #1565C0; /* Blue banner color */
+    color: white;
+    padding: 15px 20px;
+    margin-bottom: 10px;
+    border-radius: 6px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    animation: slideIn 0.5s ease-out forwards;
+    position: relative;
+}
+
+.notification-icon {
+    margin-right: 15px;
+    font-size: 1.5rem;
+}
+
+.notification-content {
+    flex-grow: 1;
+}
+
+.notification-title {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.notification-message {
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.notification-close {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    opacity: 0.7;
+}
+
+.notification-close:hover {
+    opacity: 1;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f4f8; /* Light blue-gray background */
+    color: #333;
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    font-size: 16px;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Header & Navigation */
+header.main-header {
+    background-color: #004a99; /* BBQ Blue */
+    color: #fff;
+    padding: 15px 0;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+header.main-header .logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 20px;
+}
+
+header.main-header .logo-container img {
+    height: 50px;
+    margin-right: 15px;
+}
+
+header.main-header .logo-container h1 {
+    font-size: 1.8em;
+    margin: 0;
+    font-weight: 600;
+}
+
+nav.main-nav {
+    background-color: #005cb3; /* Slightly lighter BBQ Blue */
+    padding: 10px 0;
+}
+
+nav.main-nav ul {
+    list-style: none;
+    display: flex;
+    justify-content: space-between; /* Changed from center to space-between */
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+nav.main-nav ul li {
+    margin: 5px 10px;
+    display: flex; /* Use flexbox for alignment */
+    align-items: center; /* Center content vertically */
+}
+
+nav.main-nav ul li a {
+    color: #fff;
+    text-decoration: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+    display: inline-block; /* Consistent display property */
+}
+
+nav.main-nav ul li a:hover,
+nav.main-nav ul li a.active {
+    background-color: #004a99; /* Darker BBQ Blue */
+}
+
+/* Page Specific Header (e.g., Dashboard title) */
+.page-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #005cb3; /* BBQ Blue accent */
+}
+
+.page-header h1 {
+    font-size: 2.2em;
+    color: #004a99; /* BBQ Blue */
+    font-weight: 600;
+}
+
+.welcome-message {
+    text-align: left; /* Align to left for a more standard dashboard feel */
+    margin-bottom: 25px;
+    font-size: 1.3em; /* Larger welcome text */
+    color: #333;
+    padding: 15px;
+    background-color: #e9ecef; /* Light background for emphasis */
+    border-radius: 6px;
+}
+
+/* Card Styles */
+.card-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+    flex: 1;
+    min-width: 280px; /* Minimum width for cards */
+    display: flex;
+    flex-direction: column;
+}
+
+.card h2, .section h2 {
+    font-size: 1.5em;
+    color: #005cb3; /* BBQ Blue */
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    display: flex; /* Added for icon alignment */
+    align-items: center; /* Added for icon alignment */
+}
+
+.card h2 i { /* Style for icons in card headers */
+    margin-right: 10px;
+    font-size: 1.2em; /* Adjust icon size as needed */
+    color: #005cb3; /* Match header color or use a contrasting one */
+}
+
+.card-content p, .card-content ul, .card-content table {
+    margin-bottom: 10px;
+}
+
+.card-content ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.card-content ul li {
+    padding: 5px 0;
+    border-bottom: 1px solid #f5f5f5; /* Subtle separator for list items */
+}
+
+.card-content ul li:last-child {
+    border-bottom: none; /* Remove border for the last item */
+}
+
+.card-actions {
+    margin-top: auto; /* Pushes actions to the bottom of the card */
+    padding-top: 15px;
+}
+
+.card-actions a, .card-actions button {
+    display: block;
+    text-align: center;
+}
+
+.quick-actions button {
+    margin-right: 10px;
+    margin-bottom: 10px;
+    background-color: #007bff; /* Primary blue */
+    border: none;
+    padding: 12px 18px; /* Slightly larger padding */
+    font-size: 0.95em;
+}
+
+.quick-actions button:hover {
+    background-color: #0056b3; /* Darker primary blue */
+}
+
+/* Button Styles */
+button, .button, input[type="submit"] {
+    background-color: #007bff; /* Primary Blue */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+    display: inline-block;
+    margin-top: 10px;
+}
+
+button:hover, .button:hover, input[type="submit"]:hover {
+    background-color: #0056b3; /* Darker Primary Blue */
+}
+
+button.secondary, .button.secondary {
+    background-color: #6c757d; /* Gray */
+}
+button.secondary:hover, .button.secondary:hover {
+    background-color: #545b62;
+}
+
+button.danger, .button.danger {
+    background-color: #dc3545; /* Red */
+}
+button.danger:hover, .button.danger:hover {
+    background-color: #c82333;
+}
+
+.quick-actions button {
+    margin-right: 10px;
+    margin-bottom: 10px;
+    background-color: #007bff; /* Primary blue */
+    border: none;
+    padding: 12px 18px; /* Slightly larger padding */
+    font-size: 0.95em;
+}
+
+.quick-actions button:hover {
+    background-color: #0056b3; /* Darker primary blue */
+}
+
+/* Table Styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    font-size: 0.95em;
+}
+
+table th, table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+table th {
+    background-color: #e9ecef; /* Light Gray */
+    color: #333;
+    font-weight: 600;
+}
+
+table tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+table tr:hover {
+    background-color: #e2e6ea;
+}
+
+/* Form Styles */
+form {
+    background-color: #fdfdfd;
+    padding: 20px;
+    border-radius: 5px;
+    border: 1px solid #eee;
+}
+
+form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #333;
+}
+
+form input[type="text"],
+form input[type="email"],
+form input[type="password"],
+form input[type="date"],
+form input[type="number"],
+form select,
+form textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+}
+
+form textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+form button, form input[type="submit"] {
+    width: auto;
+    min-width: 120px;
+}
+
+/* Message Area */
+#message-area, .message-area {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    text-align: center;
+}
+#message-area .success, .message-area .success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+#message-area .error, .message-area .error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+#message-area p { margin: 0; }
+
+
+/* Footer */
+footer.main-footer {
+    background-color: #343a40; /* Dark Gray */
+    color: #fff;
+    text-align: center;
+    padding: 20px 0;
+    margin-top: auto; /* Pushes footer to the bottom */
+    font-size: 0.9em;
+}
+
+/* Utility Classes */
+.text-center { text-align: center; }
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+.hidden { display: none; }
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .container {
+        width: 95%;
+        padding: 15px;
+    }
+
+    nav.main-nav ul {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    nav.main-nav ul li a {
+        display: block; /* Make nav links full width on mobile */
+        width: 100%;
+        text-align: center;
+    }
+
+    .card-container {
+        flex-direction: column;
+    }
+
+    .page-header h1 {
+        font-size: 1.8em;
+    }
+
+    header.main-header .logo-container h1 {
+        font-size: 1.5em;
+    }
+    header.main-header .logo-container img {
+        height: 40px;
+    }
+}
+
+/* Specific page styles can be added below or in separate files if needed */
+/* Example: Login page specific styles */
+.login-container {
+    max-width: 400px;
+    margin: 50px auto;
+}
+
+/* FullCalendar specific adjustments if needed */
+#calendar {
+    margin-top: 20px;
+}
+
+/* Ensure navigation links in the header are styled */
+.header-nav {
+    background-color: #005cb3;
+    padding: 0; /* Reset padding if it's part of a larger nav structure */
+}
+.header-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.header-nav ul li {
+    margin: 0; /* Reset margin if it's part of a larger nav structure */
+}
+.header-nav ul li a {
+    display: inline-block;
+    padding: 12px 18px;
+    color: white;
+    text-decoration: none;
+    font-size: 0.95em;
+    transition: background-color 0.2s ease-in-out;
+}
+.header-nav ul li a:hover, .header-nav ul li a.active {
+    background-color: #004a99;
+}
+
+/* Admin specific link styling */
+.admin-link {
+    color: #fff;
+    display: inline-block;
+}
+
+/* Logout button specific styling */
+.logout-button {
+    background-color: #d9534f; /* A distinct color for logout */
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: inline-block; /* Make it behave like other menu links */
+    margin: 0; /* Reset any margin to match other links */
+    vertical-align: middle; /* Align vertically with other menu items */
+}
+.logout-button:hover {
+    background-color: #c9302c;
+}
+
+/* Style for the navigation bar at the top of each page */
+.page-top-nav {
+    display: flex;
+    justify-content: space-between; /* Puts Dashboard link to left, user/logout to right */
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #005cb3; /* BBQ Blue */
+    color: white;
+    border-bottom: 2px solid #004a99; /* Darker BBQ Blue */
+    margin-bottom: 20px; /* Space below the nav bar */
+}
+
+.page-top-nav .nav-links a {
+    color: white;
+    text-decoration: none;
+    margin-right: 15px;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.page-top-nav .nav-links a:hover {
+    background-color: #004a99;
+}
+
+.page-top-nav .user-actions {
+    display: flex;
+    align-items: center;
+}
+
+.page-top-nav .user-actions span {
+    margin-right: 15px;
+    font-size: 0.9em;
+}
+
+/* Help and Info Page Styles */
+.help-content, .info-content {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.help-section, .info-section {
+    margin-bottom: 40px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 25px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.help-section h2, .info-section h2 {
+    color: #004a99;
+    font-size: 1.6em;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e0e6ed;
+}
+
+.faq-item {
+    margin-bottom: 25px;
+}
+
+.faq-item h3 {
+    color: #005cb3;
+    font-size: 1.3em;
+    margin-bottom: 10px;
+}
+
+.help-section ol, .help-section ul, .info-section ol, .info-section ul {
+    padding-left: 25px;
+    margin-bottom: 15px;
+}
+
+.help-section li, .info-section li {
+    margin-bottom: 10px;
+}
+
+.version-info, .contact-info {
+    background-color: #f0f4f8;
+    padding: 15px;
+    border-radius: 6px;
+    margin-top: 15px;
+}
+
+.contact-info a {
+    color: #004a99;
+    text-decoration: none;
+}
+
+.contact-info a:hover {
+    text-decoration: underline;
+}
+
+/* Dashboard Specific Enhancements */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.dashboard-card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 25px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-card h2 {
+    font-size: 1.4em; /* Slightly smaller for dashboard cards if preferred */
+    color: #005cb3;
+    margin-bottom: 18px;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 12px;
+    display: flex;
+    align-items: center;
+}
+
+.dashboard-card h2 i {
+    margin-right: 12px;
+    font-size: 1.3em;
+    color: #005cb3;
+}
+
+.dashboard-card .card-content {
+    flex-grow: 1; /* Ensure content area expands */
+}
+
+.dashboard-card .table-wrapper {
+    max-height: 300px; /* Limit height for tables within cards */
+    overflow-y: auto; /* Add scroll for overflow */
+    margin-bottom: 15px;
+}
+
+.dashboard-card .absence-list {
+    max-height: 250px; /* Limit height for lists */
+    overflow-y: auto;
+    padding-right: 10px; /* Space for scrollbar */
+}
+
+.dashboard-card .absence-list li {
+    padding: 8px 0;
+    font-size: 0.95em;
+}
+
+.dashboard-card .card-actions {
+    margin-top: auto;
+    padding-top: 18px;
+    border-top: 1px solid #f0f0f0; /* Separator for actions */
+}
+
+.dashboard-card .card-actions .button {
+    background-color: #6c757d; /* Secondary button color */
+    font-size: 0.9em;
+    padding: 8px 15px;
+}
+.dashboard-card .card-actions .button:hover {
+    background-color: #545b62;
+}
+
+/* Tab Navigation Styles */
+.tabs-container {
+    margin-bottom: 25px;
+}
+
+.tabs {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.tab {
+    padding: 12px 24px;
+    cursor: pointer;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-bottom: none;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    margin-right: 4px;
+    margin-bottom: -2px;
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    color: #495057;
+}
+
+.tab i {
+    font-size: 1.1em;
+}
+
+.tab:hover {
+    background-color: #e9ecef;
+}
+
+.tab.active {
+    background-color: #fff;
+    border-bottom: 2px solid #fff;
+    color: #004a99;
+    font-weight: 600;
+}
+
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Summary Cards for Reports */
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.summary-card {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    border: 1px solid #e9ecef;
+}
+
+.summary-card h3 {
+    color: #6c757d;
+    font-size: 1.1em;
+    margin-bottom: 10px;
+    font-weight: 500;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.summary-card .value {
+    font-size: 2.2em;
+    font-weight: bold;
+    margin: 0;
+    color: #004a99;
+}
+
+/* Filter Section */
+.filter-section {
+    margin-bottom: 20px;
+}
+
+.filter-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    align-items: end;
+}
+
+/* User Dropdown Menu */
+.user-menu {
+    position: relative;
+}
+
+.user-dropdown {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background-color: white;
+    min-width: 200px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    z-index: 999;
+    border-radius: 4px;
+    overflow: hidden;
+    display: none;
+}
+
+.user-dropdown a {
+    color: #333;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-dropdown a:hover {
+    background-color: #f8f9fa;
+}
+
+.dropdown-content.show {
+    display: block;
+}

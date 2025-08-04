@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Urlaubsanträge genehmigen | BBQ GmbH</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="stylesheet" href="/static/nav-styles.css">
+  <link rel="stylesheet" href="/static/footer-styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" href="/static/images/BBQGmbH.png" type="image/png">
+  <script src="/static/js/nav.js" defer></script>
+  <script src="/static/js/notifications.js" defer></script>
+  <style>
+    .filter-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: #f5f5f5;
+      border-radius: 8px;
+    }
+    
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      min-width: 200px;
+    }
+    
+    .filter-group label {
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 15px;
+      font-size: 0.85em;
+      font-weight: bold;
+      text-align: center;
+    }
+    
+    .status-badge.beantragt {
+      background-color: #FFF3CD;
+      color: #856404;
+    }
+    
+    .status-badge.genehmigt {
+      background-color: #D4EDDA;
+      color: #155724;
+    }
+    
+    .status-badge.abgelehnt {
+      background-color: #F8D7DA;
+      color: #721C24;
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .action-buttons button {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+    
+    .approve-btn {
+      background-color: #28a745;
+      color: white;
+    }
+    
+    .approve-btn:hover {
+      background-color: #218838;
+    }
+    
+    .reject-btn {
+      background-color: #dc3545;
+      color: white;
+    }
+    
+    .reject-btn:hover {
+      background-color: #c82333;
+    }
+    
+    .comment-btn {
+      background-color: #17a2b8;
+      color: white;
+    }
+    
+    .comment-btn:hover {
+      background-color: #138496;
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+    }
+    
+    .modal-content {
+      background-color: #fefefe;
+      margin: 15% auto;
+      padding: 20px;
+      border-radius: 8px;
+      width: 80%;
+      max-width: 600px;
+    }
+    
+    .close-modal {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    .close-modal:hover {
+      color: black;
+    }
+    
+    .modal textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      min-height: 100px;
+    }
+    
+    .modal-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    /* Responsive tables */
+    @media (max-width: 992px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      
+      thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+      }
+      
+      tr {
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+      }
+      
+      td {
+        border: none;
+        position: relative;
+        padding-left: 50%;
+        text-align: right;
+      }
+      
+      td:before {
+        position: absolute;
+        top: 6px;
+        left: 6px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: bold;
+        content: attr(data-label);
+      }
+      
+      .action-buttons {
+        justify-content: flex-end;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="main-header">
+    <button id="menu-toggle" class="menu-toggle" aria-label="Toggle menu">
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="logo-container">
+      <img src="/static/images/BBQGmbH.png" alt="BBQ GmbH Logo">
+      <h1>BBQ GmbH Zeiterfassung</h1>
+    </div>
+    <nav class="main-nav">
+      <ul>
+        <li><a href="/index.html"><i class="fas fa-home"></i> Dashboard</a></li>
+        <li><a href="/arbeitszeiten.html"><i class="fas fa-clock"></i> Arbeitszeiten</a></li>
+        <li><a href="/urlaub.html"><i class="fas fa-calendar-alt"></i> Urlaub/Abwesenheiten</a></li>
+        <li><a href="/urlaube/genehmigen" class="active" id="adminLinkApprovals" style="display:none;"><i class="fas fa-check-circle"></i> Urlaubsgenehmigungen</a></li>
+        <li><a href="/rollen.html" id="adminLinkRoles" style="display:none;"><i class="fas fa-user-shield"></i> Rollenverwaltung</a></li>
+        <li><a href="/admin_benutzer.html" id="adminLinkUsers" style="display:none;"><i class="fas fa-users-cog"></i> Benutzerverwaltung</a></li>
+        <li><a href="/info.html"><i class="fas fa-info-circle"></i> Info</a></li>
+        <li><a href="/hilfe.html"><i class="fas fa-question-circle"></i> Hilfe</a></li>
+        <li><a href="/passwort.html"><i class="fas fa-key"></i> Passwort ändern</a></li>
+        <li><button class="logout-button" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="container">
+    <div class="page-header">
+      <h1>Urlaubsanträge genehmigen</h1>
+    </div>
+    
+    <div id="message-area"></div>
+    
+    <div id="role-warning" style="display: none;" class="message warning">
+      <p><i class="fas fa-exclamation-triangle"></i> Sie benötigen Administrator- oder Manager-Rechte, um auf diese Seite zuzugreifen.</p>
+    </div>
+    
+    <div id="admin-content" style="display: none;">
+      <div class="card">
+        <h2>Filtern der Anträge</h2>
+        <div class="card-content">
+          <div class="filter-container">
+            <div class="filter-group">
+              <label for="status-filter">Status:</label>
+              <select id="status-filter">
+                <option value="">Alle</option>
+                <option value="beantragt" selected>Beantragt</option>
+                <option value="genehmigt">Genehmigt</option>
+                <option value="abgelehnt">Abgelehnt</option>
+              </select>
+            </div>
+            
+            <div class="filter-group">
+              <label for="type-filter">Abwesenheitstyp:</label>
+              <select id="type-filter">
+                <option value="">Alle</option>
+                <!-- Wird durch JavaScript gefüllt -->
+              </select>
+            </div>
+            
+            <div class="filter-group">
+              <label for="employee-filter">Mitarbeiter:</label>
+              <select id="employee-filter">
+                <option value="">Alle</option>
+                <!-- Wird durch JavaScript gefüllt -->
+              </select>
+            </div>
+            
+            <div class="filter-group">
+              <label for="date-from">Von Datum:</label>
+              <input type="date" id="date-from">
+            </div>
+            
+            <div class="filter-group">
+              <label for="date-to">Bis Datum:</label>
+              <input type="date" id="date-to">
+            </div>
+          </div>
+          
+          <button id="apply-filters" class="primary">Filter anwenden</button>
+          <button id="reset-filters">Filter zurücksetzen</button>
+        </div>
+      </div>
+      
+      <div class="card">
+        <h2>Urlaubsanträge</h2>
+        <div class="card-content">
+          <table id="absence-requests-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Mitarbeiter</th>
+                <th>Abwesenheitstyp</th>
+                <th>Von</th>
+                <th>Bis</th>
+                <th>Status</th>
+                <th>Kommentar</th>
+                <th>Aktionen</th>
+              </tr>
+            </thead>
+            <tbody id="absence-requests-tbody">
+              <!-- Wird durch JavaScript gefüllt -->
+            </tbody>
+          </table>
+          
+          <div id="no-results" style="display: none; text-align: center; padding: 20px;">
+            <p>Keine Urlaubsanträge gefunden, die den Filterkriterien entsprechen.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal für Kommentare -->
+  <div id="comment-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal">&times;</span>
+      <h3>Kommentar zur Entscheidung</h3>
+      <p>Bitte geben Sie einen Kommentar zu Ihrer Entscheidung ein:</p>
+      <textarea id="comment-text" placeholder="Kommentar eingeben..."></textarea>
+      <input type="hidden" id="absence-id">
+      <input type="hidden" id="action-type">
+      <div class="modal-buttons">
+        <button id="cancel-comment" class="secondary">Abbrechen</button>
+        <button id="submit-comment" class="primary">Bestätigen</button>
+      </div>
+    </div>
+  </div>
+  
+  <footer class="main-footer">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Über uns</h3>
+        <p>BBQ GmbH ist ein führender Anbieter von Bildungs- und Beratungslösungen für Unternehmen und Institutionen.</p>
+        <div class="social-links">
+          <a href="/404.html?feature=social" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+          <a href="/404.html?feature=social" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+          <a href="/404.html?feature=social" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="/404.html?feature=social" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        </div>
+      </div>
+      <div class="footer-section">
+        <h3>Kontakt</h3>
+        <p><i class="fas fa-map-marker-alt"></i> Digitalstraße 42, 10115 Berlin</p>
+        <p><i class="fas fa-phone"></i> +49 30 12345678</p>
+        <p><i class="fas fa-envelope"></i> info@bbqgmbh-projekt.de</p>
+      </div>
+      <div class="footer-section">
+        <h3>Links</h3>
+        <ul>
+          <li><a href="/info.html">Über uns</a></li>
+          <li><a href="/hilfe.html">Hilfe & Support</a></li>
+          <li><a href="/datenschutz.html">Datenschutz</a></li>
+          <li><a href="/impressum.html">Impressum</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="copyright-bar">
+      <p>&copy; 2025 BBQ GmbH Zeiterfassungssystem. Alle Rechte vorbehalten.</p>
+    </div>
+  </footer>
+  
+  <script>
+    const token = localStorage.getItem('accessToken');
+    const messageArea = document.getElementById('message-area');
+    const adminContent = document.getElementById('admin-content');
+    const roleWarning = document.getElementById('role-warning');
+    const commentModal = document.getElementById('comment-modal');
+    const closeModal = document.querySelector('.close-modal');
+    const cancelComment = document.getElementById('cancel-comment');
+    const submitComment = document.getElementById('submit-comment');
+    
+    // Anwendungsdaten
+    let absenceTypes = [];
+    let employees = [];
+    let absenceRequests = [];
+    let currentUserRole = null;
+    
+    // Überprüfen ob der Benutzer angemeldet ist
+    if (!token) {
+      window.location.href = '/login.html?message=Bitte zuerst anmelden.';
+    }
+    
+    // Nachricht anzeigen (Erfolg, Fehler, Warnung)
+    function displayMessage(message, type = 'error') {
+      messageArea.innerHTML = `<div class="${type}"><p>${message}</p></div>`;
+      setTimeout(() => { messageArea.innerHTML = ''; }, 5000);
+    }
+    
+    // API-Anfragen mit Authentifizierung
+    async function fetchWithAuth(url, options = {}) {
+      try {
+        const headers = {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          ...options.headers,
+        };
+        const response = await fetch(url, { ...options, headers });
+        if (response.status === 401) {
+          localStorage.removeItem('accessToken');
+          window.location.href = '/login.html?message=Session abgelaufen. Bitte erneut anmelden.';
+          throw new Error('Unauthorized');
+        }
+        return response;
+      } catch (error) {
+        console.error('API-Anfragefehler:', error);
+        throw error;
+      }
+    }
+    
+    // Benutzerrolle überprüfen
+    async function checkUserRole() {
+      try {
+        const response = await fetchWithAuth('/api/v1/users/me');
+        if (!response.ok) throw new Error('Benutzerdetails konnten nicht geladen werden.');
+        const user = await response.json();
+        
+        // Überprüfen, ob der Benutzer Admin oder Manager ist
+        if (user.rolle && (user.rolle.name === 'Administrator' || user.rolle.name === 'Manager')) {
+          currentUserRole = user.rolle.name;
+          adminContent.style.display = 'block';
+          roleWarning.style.display = 'none';
+          return true;
+        } else {
+          adminContent.style.display = 'none';
+          roleWarning.style.display = 'block';
+          return false;
+        }
+      } catch (error) {
+        console.error('Fehler beim Überprüfen der Benutzerrolle:', error);
+        displayMessage('Fehler beim Überprüfen Ihrer Benutzerrechte: ' + error.message);
+        return false;
+      }
+    }
+    
+    // Navigationselemente für Admins/Manager anzeigen
+    async function checkAdminRoleForNav() {
+      try {
+        const response = await fetchWithAuth('/api/v1/users/me');
+        if (response.ok) {
+          const user = await response.json();
+          if (user.rolle && (user.rolle.name === 'Administrator' || user.rolle.name === 'Manager')) {
+            const adminLinkRoles = document.getElementById('adminLinkRoles');
+            const adminLinkUsers = document.getElementById('adminLinkUsers');
+            const adminLinkApprovals = document.getElementById('adminLinkApprovals');
+            
+            if(adminLinkRoles) adminLinkRoles.style.display = 'inline-block';
+            if(adminLinkApprovals) adminLinkApprovals.style.display = 'inline-block';
+            
+            // Nur Administratoren dürfen Benutzer verwalten
+            if(adminLinkUsers && user.rolle.name === 'Administrator') adminLinkUsers.style.display = 'inline-block';
+          }
+        } else if (response.status === 401) {
+          logout();
+        }
+      } catch (error) {
+        console.error('Fehler beim Laden der Benutzerrolle für Navigation:', error);
+      }
+    }
+    
+    // Abwesenheitstypen laden
+    async function loadAbsenceTypes() {
+      try {
+        const response = await fetchWithAuth('/api/v1/absence-types/');
+        if (!response.ok) throw new Error('Abwesenheitstypen konnten nicht geladen werden.');
+        absenceTypes = await response.json();
+        
+        // Dropdown-Menü füllen
+        const typeFilter = document.getElementById('type-filter');
+        typeFilter.innerHTML = '<option value="">Alle</option>';
+        
+        absenceTypes.forEach(type => {
+          const option = document.createElement('option');
+          option.value = type.id;
+          option.textContent = type.name;
+          typeFilter.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Fehler beim Laden der Abwesenheitstypen:', error);
+        displayMessage(error.message);
+      }
+    }
+    
+    // Mitarbeiter laden
+    async function loadEmployees() {
+      try {
+        // Wir benötigen hier eine API, die alle Mitarbeiter zurückgibt (nur für Admins/Manager)
+        const response = await fetchWithAuth('/api/v1/users/');
+        if (!response.ok) throw new Error('Mitarbeiter konnten nicht geladen werden.');
+        employees = await response.json();
+        
+        // Dropdown-Menü füllen
+        const employeeFilter = document.getElementById('employee-filter');
+        employeeFilter.innerHTML = '<option value="">Alle</option>';
+        
+        employees.forEach(employee => {
+          const option = document.createElement('option');
+          option.value = employee.id;
+          option.textContent = `${employee.vorname} ${employee.nachname}`;
+          employeeFilter.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Fehler beim Laden der Mitarbeiter:', error);
+        displayMessage(error.message);
+      }
+    }
+    
+    // Urlaubsanträge laden und filtern
+    async function loadAbsenceRequests(filters = {}) {
+      try {
+        // URL mit Filtern erstellen
+        let url = '/api/v1/absences/?';
+        
+        if (filters.status) url += `&status_filter=${filters.status}`;
+        if (filters.type) url += `&abwesenheit_typ_id=${filters.type}`;
+        if (filters.employee) url += `&benutzer_id=${filters.employee}`;
+        if (filters.dateFrom) url += `&start_datum=${filters.dateFrom}`;
+        if (filters.dateTo) url += `&end_datum=${filters.dateTo}`;
+        
+        const response = await fetchWithAuth(url);
+        if (!response.ok) throw new Error('Urlaubsanträge konnten nicht geladen werden.');
+        absenceRequests = await response.json();
+        
+        displayAbsenceRequests(absenceRequests);
+      } catch (error) {
+        console.error('Fehler beim Laden der Urlaubsanträge:', error);
+        displayMessage(error.message);
+      }
+    }
+    
+    // Urlaubsanträge in der Tabelle anzeigen
+    function displayAbsenceRequests(requests) {
+      const tbody = document.getElementById('absence-requests-tbody');
+      const noResults = document.getElementById('no-results');
+      
+      tbody.innerHTML = '';
+      
+      if (requests.length === 0) {
+        noResults.style.display = 'block';
+        return;
+      }
+      
+      noResults.style.display = 'none';
+      
+      requests.forEach(request => {
+        const row = document.createElement('tr');
+        
+        // Mitarbeiter finden
+        const employee = employees.find(emp => emp.id === request.benutzer_id);
+        const employeeName = employee ? `${employee.vorname} ${employee.nachname}` : `ID: ${request.benutzer_id}`;
+        
+        // Abwesenheitstyp finden
+        const absenceType = absenceTypes.find(type => type.id === request.abwesenheit_typ_id);
+        const typeName = absenceType ? absenceType.name : `Typ ID: ${request.abwesenheit_typ_id}`;
+        
+        // Formatiere das Datum
+        const startDate = new Date(request.start_datum).toLocaleDateString('de-DE');
+        const endDate = new Date(request.end_datum).toLocaleDateString('de-DE');
+        
+        // Inhalt der Zeilen
+        row.innerHTML = `
+          <td data-label="ID">${request.id}</td>
+          <td data-label="Mitarbeiter">${employeeName}</td>
+          <td data-label="Abwesenheitstyp">${typeName}</td>
+          <td data-label="Von">${startDate}</td>
+          <td data-label="Bis">${endDate}</td>
+          <td data-label="Status"><span class="status-badge ${request.status}">${request.status}</span></td>
+          <td data-label="Kommentar">${request.kommentar || '-'}</td>
+          <td data-label="Aktionen" class="action-buttons">
+            ${request.status === 'beantragt' ? `
+              <button class="approve-btn" data-id="${request.id}"><i class="fas fa-check"></i> Genehmigen</button>
+              <button class="reject-btn" data-id="${request.id}"><i class="fas fa-times"></i> Ablehnen</button>
+            ` : ''}
+            ${request.kommentar_genehmiger ? `
+              <div class="genehmiger-comment">
+                <strong>Kommentar des Genehmigers:</strong>
+                <p>${request.kommentar_genehmiger}</p>
+              </div>
+            ` : ''}
+          </td>
+        `;
+        
+        tbody.appendChild(row);
+      });
+      
+      // Event-Listener für die Aktions-Buttons hinzufügen
+      document.querySelectorAll('.approve-btn').forEach(btn => {
+        btn.addEventListener('click', () => openCommentModal(btn.dataset.id, 'approve'));
+      });
+      
+      document.querySelectorAll('.reject-btn').forEach(btn => {
+        btn.addEventListener('click', () => openCommentModal(btn.dataset.id, 'reject'));
+      });
+    }
+    
+    // Kommentar-Modal öffnen
+    function openCommentModal(absenceId, action) {
+      document.getElementById('absence-id').value = absenceId;
+      document.getElementById('action-type').value = action;
+      document.getElementById('comment-text').value = '';
+      commentModal.style.display = 'block';
+    }
+    
+    // Kommentar-Modal schließen
+    function closeCommentModal() {
+      commentModal.style.display = 'none';
+    }
+    
+    // Urlaubsantrag genehmigen
+    async function approveAbsence(absenceId, comment) {
+      try {
+        const response = await fetchWithAuth(`/api/v1/absences/${absenceId}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            status: 'genehmigt',
+            kommentar_genehmiger: comment
+          })
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ detail: 'Unbekannter Fehler.' }));
+          throw new Error(errorData.detail || `Fehler: ${response.statusText}`);
+        }
+        
+        displayMessage('Urlaubsantrag erfolgreich genehmigt.', 'success');
+        
+        // Urlaubsanträge neu laden mit aktuellen Filtern
+        applyFilters();
+        
+        // Benachrichtigung senden
+        sendNotification(absenceId, 'genehmigt', comment);
+        
+        // Dashboard-Daten aktualisieren
+        updateDashboardData();
+      } catch (error) {
+        console.error('Fehler beim Genehmigen des Urlaubsantrags:', error);
+        displayMessage(error.message);
+      }
+    }
+    
+    // Urlaubsantrag ablehnen
+    async function rejectAbsence(absenceId, comment) {
+      try {
+        const response = await fetchWithAuth(`/api/v1/absences/${absenceId}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            status: 'abgelehnt',
+            kommentar_genehmiger: comment
+          })
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ detail: 'Unbekannter Fehler.' }));
+          throw new Error(errorData.detail || `Fehler: ${response.statusText}`);
+        }
+        
+        displayMessage('Urlaubsantrag erfolgreich abgelehnt.', 'success');
+        
+        // Urlaubsanträge neu laden mit aktuellen Filtern
+        applyFilters();
+        
+        // Benachrichtigung senden
+        sendNotification(absenceId, 'abgelehnt', comment);
+        
+        // Dashboard-Daten aktualisieren
+        updateDashboardData();
+      } catch (error) {
+        console.error('Fehler beim Ablehnen des Urlaubsantrags:', error);
+        displayMessage(error.message);
+      }
+    }
+    
+    // Benachrichtigung senden (wenn die Benachrichtigungs-API vorhanden ist)
+    async function sendNotification(absenceId, status, comment) {
+      try {
+        // Finde den Urlaubsantrag
+        const request = absenceRequests.find(req => req.id === parseInt(absenceId));
+        if (!request) return;
+        
+        // Finde den Mitarbeiter
+        const employee = employees.find(emp => emp.id === request.benutzer_id);
+        if (!employee) return;
+        
+        // Text für die Benachrichtigung
+        const title = `Ihr Urlaubsantrag wurde ${status === 'genehmigt' ? 'genehmigt' : 'abgelehnt'}`;
+        const message = `Ihr Urlaubsantrag vom ${new Date(request.start_datum).toLocaleDateString('de-DE')} bis ${new Date(request.end_datum).toLocaleDateString('de-DE')} wurde ${status === 'genehmigt' ? 'genehmigt' : 'abgelehnt'}.`;
+        
+        // Wenn eine Benachrichtigungs-API existiert, nutze diese
+        if (typeof createNotification === 'function') {
+          createNotification(request.benutzer_id, title, message, comment, 'urlaub');
+        } else {
+          console.log('Benachrichtigungsfunktion ist nicht verfügbar');
+        }
+      } catch (error) {
+        console.error('Fehler beim Senden der Benachrichtigung:', error);
+      }
+    }
+    
+    // Dashboard-Daten aktualisieren
+    function updateDashboardData() {
+      // Falls eine Funktion existiert, um Dashboard-Daten zu aktualisieren
+      // Diese könnte in einer gemeinsamen JS-Datei definiert sein
+      if (typeof refreshDashboardData === 'function') {
+        refreshDashboardData();
+      }
+    }
+    
+    // Aktuelle Filter anwenden
+    function applyFilters() {
+      const filters = {
+        status: document.getElementById('status-filter').value,
+        type: document.getElementById('type-filter').value,
+        employee: document.getElementById('employee-filter').value,
+        dateFrom: document.getElementById('date-from').value,
+        dateTo: document.getElementById('date-to').value
+      };
+      
+      loadAbsenceRequests(filters);
+    }
+    
+    // Filter zurücksetzen
+    function resetFilters() {
+      document.getElementById('status-filter').value = 'beantragt';
+      document.getElementById('type-filter').value = '';
+      document.getElementById('employee-filter').value = '';
+      document.getElementById('date-from').value = '';
+      document.getElementById('date-to').value = '';
+      
+      applyFilters();
+    }
+    
+    // Abmelden
+    function logout() {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('currentUser');
+      sessionStorage.removeItem('accessToken');
+      sessionStorage.removeItem('currentUser');
+      document.cookie.split(";").forEach(c => {
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      });
+      window.location.href = '/Login.html';
+    }
+    
+    // Event-Listener
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!token) {
+        window.location.href = '/login.html';
+        return;
+      }
+      
+      // Benutzerrolle überprüfen
+      const hasAccess = await checkUserRole();
+      if (!hasAccess) {
+        console.log('Kein Zugriff auf diese Seite');
+        return;
+      }
+      
+      // Navigationselemente aktualisieren
+      checkAdminRoleForNav();
+      
+      // Daten laden
+      await Promise.all([
+        loadAbsenceTypes(),
+        loadEmployees()
+      ]);
+      
+      // Urlaubsanträge mit Standard-Filter (beantragt) laden
+      loadAbsenceRequests({ status: 'beantragt' });
+      
+      // Event-Listener für Filter-Buttons
+      document.getElementById('apply-filters').addEventListener('click', applyFilters);
+      document.getElementById('reset-filters').addEventListener('click', resetFilters);
+      
+      // Event-Listener für das Modal
+      closeModal.addEventListener('click', closeCommentModal);
+      cancelComment.addEventListener('click', closeCommentModal);
+      
+      submitComment.addEventListener('click', () => {
+        const absenceId = document.getElementById('absence-id').value;
+        const actionType = document.getElementById('action-type').value;
+        const comment = document.getElementById('comment-text').value;
+        
+        if (actionType === 'approve') {
+          approveAbsence(absenceId, comment);
+        } else if (actionType === 'reject') {
+          rejectAbsence(absenceId, comment);
+        }
+        
+        closeCommentModal();
+      });
+      
+      // Modal schließen, wenn außerhalb geklickt wird
+      window.addEventListener('click', (event) => {
+        if (event.target === commentModal) {
+          closeCommentModal();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
