@@ -1,58 +1,69 @@
-version: '3.8' # Specify a more recent version for better features
+# ===================================================================
+# Optimierte docker-compose.yml für Render.com & lokale Entwicklung
+# ===================================================================
+# HINWEIS: Die 'version'-Angabe ist veraltet und wurde entfernt.
+
+# Definiert wiederverwendbare Konfigurationen
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
 
 services:
-  web:
-    build:
+  # -------------------- Datenbank-Service --------------------
+  db:
+    image: postgres:15-alpine
+    container_name: zeiterfassung_db
+    # Lädt sensible Daten aus der .env-Datei, anstatt sie hier festzuschreiben.
+    # Auf Render.com werden diese Variablen im "Environment"-Tab gesetzt.
+    env_file:
+      - .env
+    volumes:
+      # Stellt sicher, dass Ihre Datenbankdaten auch nach einem Neustart erhalten bleiben.
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      # Überprüft, ob die Datenbank bereit ist, Verbindungen anzunehmen.
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging: *default-logging
+    restart: unless-stopped
+
+  # -------------------- Applikations-Service --------------------
+  app:
+    build: 
       context: .
       dockerfile: Dockerfile
-    container_name: zeiterfassung_web
-    # For development, mount the current directory to the container for live reloading
-    # For production, you would typically not mount the source code directly
-    volumes:
-      - .:/app # Mounts current directory into /app in container
-    ports:
-      - "${APP_PORT:-8000}:8000" # Host port:Container port, configurable via .env
+      args:
+        # Gibt an, dass dies eine Produktionsumgebung ist.
+        - ENVIRONMENT=production
+    container_name: zeiterfassung_app
+    # Lädt ebenfalls sensible Daten und Konfigurationen aus der .env-Datei.
     env_file:
-      - .env # Loads environment variables from .env file
-    environment:
-      # Ensure PYTHONPATH is set if not already in Dockerfile or if needed for specific entrypoints
-      - PYTHONPATH=/app
-      # Email configuration
-      - EMAIL_ENABLED=${EMAIL_ENABLED:-false}
-      - SMTP_SERVER=${SMTP_SERVER:-smtp.strato.de}
-      - SMTP_PORT=${SMTP_PORT:-465}
-      - SMTP_USERNAME=${SMTP_USERNAME:-webmaster@zaksprojects.de}
-      - SMTP_PASSWORD=${SMTP_PASSWORD:-Zaka123123!!}
-      - SENDER_EMAIL=${SENDER_EMAIL:-webmaster@zaksprojects.de}
-      - SENDER_NAME=${SENDER_NAME:-BBQ GmbH Zeiterfassung}
-      - APP_URL=${APP_URL:-http://localhost:8000}
-      - ENVIRONMENT=${ENVIRONMENT:-development}
-      # Database connection details are loaded from .env via env_file
+      - .env
+    ports:
+      # Mappt den Port 8000 des Containers auf den Port 8000 Ihres lokalen Rechners.
+      # Render.com weist den Port automatisch zu.
+      - "8000:8000"
     depends_on:
       db:
-        condition: service_healthy # Waits for db to be healthy before starting web
-    restart: unless-stopped
-    # user: "appuser:appgroup" # Run as non-root user defined in Dockerfile (important for security)
-
-  db:
-    image: postgres:15-alpine # Using a specific, recent version of PostgreSQL
-    container_name: zeiterfassung_db
-    env_file:
-      - .env # Loads POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB from .env
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/ # Persistent storage for database
-    ports:
-      # Maps host port (from .env or default 5432) to container port (5432)
-      - "${DB_HOST_PORT:-5433}:5432"
+        # Stellt sicher, dass die App erst startet, wenn die Datenbank bereit ist.
+        condition: service_healthy
     healthcheck:
-      # Test command checks if PostgreSQL is ready to accept connections
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-user} -d ${POSTGRES_DB:-db} -q"]
-      interval: 10s   # How often to run the check
-      timeout: 5s     # How long to wait for a response
-      retries: 5      # How many times to retry before marking as unhealthy
-      start_period: 10s # Grace period for the container to start before health checks begin
+      # Überprüft, ob Ihre FastAPI-Anwendung korrekt läuft.
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging: *default-logging
     restart: unless-stopped
+
+# -------------------- Netzwerke & Volumes --------------------
+# Docker Compose erstellt automatisch ein Standard-Netzwerk für diese Dienste.
+# Explizite Netzwerkdefinitionen sind für dieses einfache Setup nicht notwendig.
 
 volumes:
-  postgres_data: # Defines the named volume for data persistence
-    driver: local # Explicitly define driver, though 'local' is default
+  postgres_data:
+    driver: local
