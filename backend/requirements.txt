@@ -4,6 +4,7 @@ uvicorn[standard]==0.24.0
 SQLAlchemy==2.0.23
 psycopg2-binary==2.9.9
 Jinja2==3.1.2
+pydantic==1.10.13
 
 # Authentication and security
 bcrypt==3.2.2
