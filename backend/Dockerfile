@@ -43,4 +43,9 @@ EXPOSE 8000
 # If you create an entrypoint.sh to wait for the database, use:
 # ENTRYPOINT ["/app/entrypoint.sh"] 
 # For now, directly running uvicorn:
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+# Code für ein lokales Deployment
+#CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+# Code für das neue Deployment
+CMD uvicorn main:app --host 0.0.0.0 --port $PORT
