@@ -51,15 +51,16 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-# 1. Versuche, die DATABASE_URL direkt aus den Umgebungsvariablen zu lesen 
+# 1. PRÜFUNG: Gibt es eine fertige Datenbank-URL 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 if DATABASE_URL:
-    # Fix für SQLAlchemy: Render gibt oft "postgres://" zurück, aber SQLAlchemy braucht "postgresql://"
+    # Fix für Render: Render beginnt URLs oft mit "postgres://", 
+    # aber SQLAlchemy benötigt "postgresql://"
     if DATABASE_URL.startswith("postgres://"):
         DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 else:
-    # 2. Fallback: Baue die URL aus Einzelteilen (für lokales Docker Compose)
+    # 2. FALLBACK: Wir sind lokal (Docker), baue die URL selbst
     DB_USER = os.getenv("POSTGRES_USER", "pm_user")
     DB_PASSWORD = os.getenv("POSTGRES_PASSWORD", "password")
     DB_SERVICE_NAME = os.getenv("DATABASE_SERVICE_NAME", "db")
@@ -68,14 +69,17 @@ else:
     
     DATABASE_URL = f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_SERVICE_NAME}:{DB_PORT}/{DB_NAME}"
 
-print(f"Connecting to database at: {DATABASE_URL.split('@')[-1]}") # Loggt host (aber kein Passwort)
+print(f"Verbinde mit Datenbank unter: {DATABASE_URL.split('@')[-1]}") # Loggt den Host (ohne Passwort)
 
+# Engine erstellen
 engine = create_engine(DATABASE_URL)
 
+# Session erstellen
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
+# Dependency
 def get_db():
     db = SessionLocal()
     try:
