@@ -29,6 +29,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # The ownership will be set in docker-compose for dev, or use COPY --chown for prod-like builds
 COPY . .
 
+WORKDIR /app/backend
+
 # Ensure the entrypoint script is executable if you have one, e.g., entrypoint.sh
 # RUN chmod +x ./entrypoint.sh
 
