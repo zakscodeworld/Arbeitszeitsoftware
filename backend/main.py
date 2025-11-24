@@ -8,10 +8,13 @@ from fastapi.exception_handlers import HTTPException
 from sqlalchemy.orm import Session
 from datetime import date, datetime
 import os
+import sys
 
 # Load environment variables from .env file if present
 from dotenv import load_dotenv
 load_dotenv()
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # Set up email configuration with known working values
 email_config = {
